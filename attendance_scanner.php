@@ -1,9 +1,6 @@
 <?php
 require_once 'config.php';
 
-// Set Philippines timezone for all date operations
-date_default_timezone_set('Asia/Manila');
-
 // Check if user is logged in
 if (!isLoggedIn()) {
     redirect('login.php');
@@ -771,7 +768,7 @@ ob_start();
         
         if (modalStudentName) modalStudentName.textContent = `${student.first_name} ${student.last_name}`;
         if (modalBarcode) modalBarcode.textContent = barcode;
-        if (modalTime) modalTime.textContent = new Date().toLocaleTimeString();
+        if (modalTime) modalTime.textContent = new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Manila' });
         
         // Set hidden form values
         if (confirmStudentId) confirmStudentId.value = student.id;

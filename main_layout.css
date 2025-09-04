@@ -4,11 +4,20 @@
     box-sizing: border-box;
 }
 
+html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f5f7fa;
     color: #333;
     line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
 }
 
 .main-container {
@@ -30,6 +39,11 @@ body {
     top: 0;
     z-index: 1000;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    margin: 0;
+    padding: 0;
+    border: none;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .sidebar-header {
@@ -66,23 +80,26 @@ body {
 /* Sidebar Menu */
 .sidebar-menu {
     flex: 1;
-    padding: 20px 0;
+    padding: 0;
     overflow-y: auto;
 }
 
 .menu-list {
     list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 .menu-item {
-    margin-bottom: 5px;
+    margin-bottom: 0;
+    width: 100%;
 }
 
 .menu-item > a,
 .menu-toggle {
     display: flex;
     align-items: center;
-    padding: 15px 20px;
+    padding: 18px 20px;
     color: rgba(255, 255, 255, 0.8);
     text-decoration: none;
     transition: all 0.3s ease;
@@ -91,19 +108,26 @@ body {
     background: none;
     width: 100%;
     text-align: left;
+    margin: 0;
+    box-sizing: border-box;
+    position: relative;
 }
 
 .menu-item > a:hover,
 .menu-toggle:hover,
 .menu-item.active > a {
-    background: rgba(17, 153, 142, 0.2);
+    background: rgba(17, 153, 142, 0.3);
     color: white;
     padding-left: 25px;
+    transform: translateX(3px);
+    box-shadow: inset 4px 0 0 #11998e;
 }
 
 .menu-item.active > a {
-    background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
-    box-shadow: 0 2px 10px rgba(17, 153, 142, 0.3);
+    background: linear-gradient(90deg, rgba(17, 153, 142, 0.4) 0%, rgba(56, 239, 125, 0.3) 100%);
+    box-shadow: inset 4px 0 0 #11998e, 0 2px 8px rgba(17, 153, 142, 0.2);
+    color: white;
+    font-weight: 600;
 }
 
 .menu-item i {
@@ -128,6 +152,8 @@ body {
     overflow: hidden;
     transition: max-height 0.3s ease;
     background: rgba(0, 0, 0, 0.2);
+    margin: 0;
+    padding: 0;
 }
 
 .menu-item.active .submenu {
@@ -137,22 +163,30 @@ body {
 .submenu li a {
     display: flex;
     align-items: center;
-    padding: 12px 20px 12px 60px;
+    padding: 14px 20px 14px 60px;
     color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
     transition: all 0.3s ease;
     font-size: 0.9rem;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    position: relative;
 }
 
 .submenu li a:hover,
 .submenu li a.active {
-    background: rgba(17, 153, 142, 0.3);
+    background: rgba(17, 153, 142, 0.4);
     color: white;
     padding-left: 65px;
+    transform: translateX(2px);
+    box-shadow: inset 3px 0 0 #38ef7d;
 }
 
 .submenu li a.active {
-    border-left: 3px solid #11998e;
+    background: rgba(17, 153, 142, 0.5);
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 #38ef7d, 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .submenu li i {
@@ -639,6 +673,20 @@ body {
     }
 }
 
+/* Disable mobile responsive for desktop - Bootstrap override */
+@media (min-width: 769px) {
+    .sidebar {
+        transform: translateX(0) !important;
+        width: 280px !important;
+        position: fixed !important;
+        left: 0 !important;
+    }
+    
+    .main-content {
+        margin-left: 280px !important;
+    }
+}
+
 @media (max-width: 768px) {
     .sidebar {
         transform: translateX(-100%);
@@ -678,4 +726,282 @@ body {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== BOOTSTRAP OVERRIDE FIXES ===== */
+/* Ensure layout stays intact when Bootstrap is loaded */
+
+/* Override Bootstrap's body and html styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    background: #f5f7fa !important;
+    color: #333 !important;
+    line-height: 1.6 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+}
+
+html {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Force sidebar positioning and dimensions */
+.sidebar {
+    width: 280px !important;
+    position: fixed !important;
+    height: 100vh !important;
+    left: 0 !important;
+    top: 0 !important;
+    z-index: 1050 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%) !important;
+    color: white !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+/* Force main content positioning */
+.main-content {
+    margin-left: 280px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100vh !important;
+    flex: 1 !important;
+    width: calc(100% - 280px) !important;
+    position: relative !important;
+}
+
+/* Ensure main container flex layout */
+.main-container {
+    display: flex !important;
+    min-height: 100vh !important;
+    position: relative !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Override Bootstrap container styles that might interfere */
+.main-container .container,
+.main-container .container-fluid {
+    margin-left: 0 !important;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    max-width: none !important;
+    width: 100% !important;
+}
+
+/* Fix any Bootstrap grid interference */
+.main-content [class*="col-"] {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+}
+
+/* Ensure sidebar header displays properly */
+.sidebar-header {
+    padding: 25px 20px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    text-align: center !important;
+}
+
+/* Ensure sidebar menu displays properly */
+.sidebar-menu {
+    flex: 1 !important;
+    padding: 0 !important;
+    overflow-y: auto !important;
+}
+
+/* Ensure sidebar menu items display properly */
+.sidebar .menu-list {
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.sidebar .menu-item {
+    margin-bottom: 0 !important;
+    width: 100% !important;
+}
+
+.sidebar .menu-item > a,
+.sidebar .menu-toggle {
+    display: flex !important;
+    align-items: center !important;
+    padding: 18px 20px !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    text-decoration: none !important;
+    border: none !important;
+    background: none !important;
+    width: 100% !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.sidebar .menu-item > a:hover,
+.sidebar .menu-toggle:hover,
+.sidebar .menu-item.active > a {
+    background: rgba(17, 153, 142, 0.3) !important;
+    color: white !important;
+    padding-left: 25px !important;
+    transform: translateX(3px) !important;
+    box-shadow: inset 4px 0 0 #11998e !important;
+}
+
+.sidebar .menu-item.active > a {
+    background: linear-gradient(90deg, rgba(17, 153, 142, 0.4) 0%, rgba(56, 239, 125, 0.3) 100%) !important;
+    box-shadow: inset 4px 0 0 #11998e, 0 2px 8px rgba(17, 153, 142, 0.2) !important;
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+/* Ensure sidebar menu items display properly */
+.sidebar .menu-list {
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.sidebar .menu-item {
+    margin-bottom: 5px !important;
+}
+
+.sidebar .menu-item > a,
+.sidebar .menu-toggle {
+    display: flex !important;
+    align-items: center !important;
+    padding: 15px 20px !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    text-decoration: none !important;
+    border: none !important;
+    background: none !important;
+    width: 100% !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+.sidebar .menu-item > a:hover,
+.sidebar .menu-toggle:hover,
+.sidebar .menu-item.active > a {
+    background: rgba(17, 153, 142, 0.2) !important;
+    color: white !important;
+}
+
+/* Ensure submenu displays properly */
+.sidebar .submenu {
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: rgba(0, 0, 0, 0.1) !important;
+}
+
+.sidebar .submenu li a {
+    padding: 12px 20px 12px 60px !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    text-decoration: none !important;
+    display: block !important;
+    transition: all 0.3s ease !important;
+}
+
+.sidebar .submenu li a:hover,
+.sidebar .submenu li a.active {
+    background: rgba(17, 153, 142, 0.3) !important;
+    color: white !important;
+}
+
+/* Ensure submenu displays properly */
+.sidebar .submenu {
+    list-style: none !important;
+  
+    background: rgba(0, 0, 0, 0.2) !important;
+}
+
+.sidebar .submenu li a {
+    display: flex !important;
+    align-items: center !important;
+    padding: 14px 20px 14px 60px !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    text-decoration: none !important;
+    transition: all 0.3s ease !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+}
+
+.sidebar .submenu li a:hover,
+.sidebar .submenu li a.active {
+    background: rgba(17, 153, 142, 0.4) !important;
+    color: white !important;
+    padding-left: 65px !important;
+    transform: translateX(2px) !important;
+    box-shadow: inset 3px 0 0 #38ef7d !important;
+}
+
+.sidebar .submenu li a.active {
+    background: rgba(17, 153, 142, 0.5) !important;
+    font-weight: 600 !important;
+    box-shadow: inset 3px 0 0 #38ef7d, 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Fix top header positioning */
+.top-header {
+    background: white !important;
+    padding: 0 30px !important;
+    height: 70px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1040 !important;
+}
+
+/* Fix page content */
+.page-content {
+    flex: 1 !important;
+    padding: 30px !important;
+    background: #f5f7fa !important;
+}
+
+/* ===== FINAL LAYOUT LOCK - HIGHEST PRIORITY ===== */
+/* Ensure layout works regardless of Bootstrap interference */
+body.d-flex,
+body[class*="bootstrap"] {
+    display: block !important;
+}
+
+.main-container {
+    position: relative !important;
+    display: flex !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 100vh !important;
+}
+
+.sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 280px !important;
+    height: 100vh !important;
+    z-index: 1050 !important;
+    overflow-y: auto !important;
+}
+
+.main-content {
+    margin-left: 280px !important;
+    width: calc(100% - 280px) !important;
+    min-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    position: relative !important;
 }

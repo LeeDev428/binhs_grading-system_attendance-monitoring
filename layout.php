@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $page_title ?? 'BINHS Grading System'; ?></title>
-    <link rel="stylesheet" href="main_layout.css">
+    <!-- Bootstrap CSS - Load FIRST so main_layout.css can override it -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom Layout CSS - Load LAST to override Bootstrap -->
+    <link rel="stylesheet" href="main_layout.css">
 </head>
 <body>
     <div class="main-container">
@@ -52,7 +56,7 @@
                         </a>
                         <ul class="submenu">
                             <li><a href="attendance_scanner.php" class="<?php echo ($current_page == 'attendance_scanner') ? 'active' : ''; ?>">
-                                <i class="fas fa-qrcode"></i>Manual Scanning</a></li>
+                                <i class="fas fa-qrcode"></i>Manual <br>Scanning</a></li>
                             <li><a href="attendance_reports.php" class="<?php echo ($current_page == 'attendance_reports') ? 'active' : ''; ?>">
                                 <i class="fas fa-chart-line"></i>Attendance Reports</a></li>
                         </ul>
@@ -122,6 +126,9 @@
         </main>
     </div>
     
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Main Layout JS -->
     <script src="main_layout.js"></script>
 </body>
 </html>

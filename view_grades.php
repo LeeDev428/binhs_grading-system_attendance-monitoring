@@ -5,9 +5,6 @@ require_once 'config.php';
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Set Philippines timezone for all date operations
-date_default_timezone_set('Asia/Manila');
-
 // Check if user is logged in
 if (!isLoggedIn()) {
     redirect('login.php');
@@ -28,52 +25,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_attendance'])
     $student_name = $_POST['student_name'];
     
     try {
-        // ===== SET PHILIPPINES TIMEZONE =====
-        date_default_timezone_set('Asia/Manila');
+        // Double-check student exists and not already scanned
+        $stmt = $pdo->prepare("SELECT * FROM students WHERE id = ? AND barcode = ? AND is_scanned = 0");
+        $stmt->execute([$student_id, $barcode]);
+        $student = $stmt->fetch();
         
-        // Get current Philippines date and time
-        $ph_date = date('Y-m-d');
-        $ph_time = date('H:i:s');
-        $ph_datetime = date('Y-m-d H:i:s');
-        
-        // Check if student already scanned TODAY in Philippines timezone
-        $stmt = $pdo->prepare("
-            SELECT * FROM daily_attendance 
-            WHERE student_id = ? AND DATE(scan_datetime) = ?
-        ");
-        $stmt->execute([$student_id, $ph_date]);
-        $existing_attendance = $stmt->fetch();
-        
-        if ($existing_attendance) {
-            $attendance_message = "⚠️ {$student_name} already scanned today ({$ph_date})!";
-            $attendance_type = 'error';
-        } else {
-            // Double-check student exists
-            $stmt = $pdo->prepare("SELECT * FROM students WHERE id = ? AND barcode = ?");
-            $stmt->execute([$student_id, $barcode]);
-            $student = $stmt->fetch();
+        if ($student) {
+            // Update is_scanned to 1
+            $stmt = $pdo->prepare("UPDATE students SET is_scanned = 1 WHERE id = ?");
+            $success = $stmt->execute([$student_id]);
             
-            if ($student) {
-                // Determine status based on Philippines time
-                $status = ($ph_time > '08:00:00') ? 'late' : 'present';
-                
+            if ($success && $stmt->rowCount() > 0) {
                 // Record attendance with Philippines timezone
+                $current_time = date('H:i');
+                $status = ($current_time > '08:00') ? 'late' : 'present';
+                
+                // Insert/update attendance record with Philippines date and time
                 $stmt = $pdo->prepare("
-                    INSERT INTO daily_attendance (student_id, barcode, scan_date, scan_time, scan_datetime, status) 
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    INSERT INTO daily_attendance (student_id, barcode, scan_date, scan_time, status) 
+                    VALUES (?, ?, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE scan_time = VALUES(scan_time), status = VALUES(status)
                 ");
-                $stmt->execute([$student_id, $barcode, $ph_date, $ph_time, $ph_datetime, $status]);
+                $stmt->execute([$student_id, $barcode, date('Y-m-d'), date('H:i:s'), $status]);
                 
-                // Update is_scanned flag (optional - for daily reset)
-                $stmt = $pdo->prepare("UPDATE students SET is_scanned = 1 WHERE id = ?");
-                $stmt->execute([$student_id]);
-                
-                $attendance_message = "✅ ATTENDANCE CONFIRMED! {$student_name} marked {$status} at " . date('g:i A') . " (Philippines Time)";
+                // Display confirmation with Philippines time
+                $philippines_time = date('g:i A');
+                $attendance_message = "✅ ATTENDANCE CONFIRMED! {$student_name} marked {$status} at {$philippines_time} (Philippines Time)";
                 $attendance_type = 'success';
             } else {
-                $attendance_message = "❌ Student verification failed for {$student_name}";
+                $attendance_message = "❌ Failed to update attendance for {$student_name}";
                 $attendance_type = 'error';
             }
+        } else {
+            $attendance_message = "❌ Student verification failed for {$student_name}";
+            $attendance_type = 'error';
         }
         
     } catch (Exception $e) {
@@ -207,8 +192,7 @@ ob_start();
                             <i class="fas fa-check"></i> YES - RECORD ATTENDANCE
                         </button>
                     </form>
-                    <br>
-                    <br>
+                    <br><br>
                     <button type="button" class="btn btn-danger btn-lg" onclick="cancelScan()" style="padding: 15px 30px;">
                         <i class="fas fa-times"></i> NO - CANCEL
                     </button>
@@ -619,44 +603,6 @@ ob_start();
         padding: 15px 12px;
         border-bottom: 1px solid #e9ecef;
     }
-
-      .modal-backdrop {
-        backdrop-filter: blur(5px);
-    }
-    
-    .modal-content {
-        border-radius: 15px;
-        border: none;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-    
-    .modal-header {
-        background: linear-gradient(135deg, #11998e, #38ef7d);
-        color: white;
-        border-radius: 15px 15px 0 0;
-        border-bottom: none;
-    }
-    
-    .barcode-container {
-        background: white;
-        padding: 30px;
-        border: 3px solid #ddd;
-        border-radius: 10px;
-        display: inline-block;
-        margin: 20px auto;
-    }
-    
-    #barcodeCanvas {
-        max-width: 100%;
-        height: auto;
-    }
-    
-    .barcode-text {
-        font-family: 'Courier New', monospace;
-        font-size: 18px;
-        font-weight: bold;
-        letter-spacing: 2px;
-    }
     
     /* Print styles */
     @media print {
@@ -732,257 +678,29 @@ ob_start();
     }
 </script>
 
-<!-- Custom Modal CSS (replacing Bootstrap) -->
+<!-- Bootstrap CSS and JS for Modal -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Custom Modal Styles -->
 <style>
-    /* Modal Backdrop */
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1050;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.5);
+    .modal-backdrop {
         backdrop-filter: blur(5px);
     }
-
-    .modal.show {
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .modal-dialog {
-        max-width: 500px;
-        width: 90%;
-        margin: 20px;
-    }
-
-    .modal-dialog.modal-lg {
-        max-width: 800px;
-    }
-
+    
     .modal-content {
-        background: white;
         border-radius: 15px;
         border: none;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        overflow: hidden;
-        animation: modalSlideIn 0.3s ease-out;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     }
-
-    @keyframes modalSlideIn {
-        from {
-            transform: translateY(-50px);
-            opacity: 0;
-        }
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    }
-
+    
     .modal-header {
         background: linear-gradient(135deg, #11998e, #38ef7d);
         color: white;
-        padding: 20px 25px;
+        border-radius: 15px 15px 0 0;
         border-bottom: none;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
     }
-
-    .modal-title {
-        margin: 0;
-        font-size: 1.25rem;
-        font-weight: 600;
-    }
-
-    .btn-close {
-        background: none;
-        border: none;
-        color: white;
-        font-size: 24px;
-        cursor: pointer;
-        padding: 0;
-        width: 30px;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        transition: background-color 0.3s ease;
-    }
-
-    .btn-close:hover {
-        background-color: rgba(255,255,255,0.2);
-    }
-
-    .btn-close::before {
-        content: "×";
-    }
-
-    .modal-body {
-        padding: 30px;
-        text-align: center;
-    }
-
-    /* Custom Alert Styles */
-    .alert {
-        padding: 15px;
-        margin-bottom: 20px;
-        border: 1px solid transparent;
-        border-radius: 8px;
-        position: relative;
-    }
-
-    .alert-success {
-        color: #155724;
-        background-color: #d4edda;
-        border-color: #c3e6cb;
-    }
-
-    .alert-danger {
-        color: #721c24;
-        background-color: #f8d7da;
-        border-color: #f5c6cb;
-    }
-
-    .alert-warning {
-        color: #856404;
-        background-color: #fff3cd;
-        border-color: #ffeaa7;
-    }
-
-    .alert-dismissible .btn-close {
-        position: absolute;
-        top: 50%;
-        right: 15px;
-        transform: translateY(-50%);
-        color: inherit;
-        font-size: 18px;
-        width: 20px;
-        height: 20px;
-    }
-
-    /* Form Styles */
-    .form-control {
-        display: block;
-        width: 100%;
-        padding: 12px 16px;
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #495057;
-        background-color: #fff;
-        border: 2px solid #ced4da;
-        border-radius: 8px;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: #11998e;
-        box-shadow: 0 0 0 0.2rem rgba(17, 153, 142, 0.25);
-    }
-
-    .form-label {
-        margin-bottom: 8px;
-        font-weight: 600;
-        display: block;
-    }
-
-    .form-text {
-        margin-top: 8px;
-        font-size: 0.875rem;
-    }
-
-    /* Button Styles */
-    .btn {
-        display: inline-block;
-        padding: 12px 24px;
-        font-size: 1rem;
-        font-weight: 600;
-        text-align: center;
-        text-decoration: none;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        margin: 4px;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #007bff, #0056b3);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,123,255,0.4);
-    }
-
-    .btn-success {
-        background: linear-gradient(135deg, #28a745, #1e7e34);
-        color: white;
-    }
-
-    .btn-success:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(40,167,69,0.4);
-    }
-
-    .btn-danger {
-        background: linear-gradient(135deg, #dc3545, #c82333);
-        color: white;
-    }
-
-    .btn-danger:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(220,53,69,0.4);
-    }
-
-    .btn-secondary {
-        background: linear-gradient(135deg, #6c757d, #545b62);
-        color: white;
-    }
-
-    .btn-lg {
-        padding: 15px 30px;
-        font-size: 1.1rem;
-    }
-
-    .btn-outline-primary {
-        background: transparent;
-        color: #007bff;
-        border: 2px solid #007bff;
-    }
-
-    .btn-outline-primary:hover {
-        background: #007bff;
-        color: white;
-    }
-
-    .btn-sm {
-        padding: 8px 16px;
-        font-size: 0.875rem;
-    }
-
-    /* Utility classes */
-    .text-center { text-align: center; }
-    .text-primary { color: #007bff; }
-    .text-success { color: #28a745; }
-    .mb-2 { margin-bottom: 0.5rem; }
-    .mb-4 { margin-bottom: 1.5rem; }
-    .mt-3 { margin-top: 1rem; }
-    .me-3 { margin-right: 1rem; }
-    .d-flex { display: flex; }
-    .d-inline { display: inline; }
-    .gap-2 { gap: 0.5rem; }
-    .justify-content-center { justify-content: center; }
-    .font-monospace { font-family: 'Courier New', monospace; }
-
-    /* Barcode specific styles */
+    
     .barcode-container {
         background: white;
         padding: 30px;
@@ -991,12 +709,12 @@ ob_start();
         display: inline-block;
         margin: 20px auto;
     }
-
+    
     #barcodeCanvas {
         max-width: 100%;
         height: auto;
     }
-
+    
     .barcode-text {
         font-family: 'Courier New', monospace;
         font-size: 18px;
@@ -1004,76 +722,6 @@ ob_start();
         letter-spacing: 2px;
     }
 </style>
-
-<!-- Custom Modal JavaScript (replacing Bootstrap) -->
-<script>
-    // Custom Modal Implementation
-    class CustomModal {
-        constructor(element) {
-            this.element = element;
-            this.backdrop = null;
-        }
-
-        show() {
-            this.element.classList.add('show');
-            this.element.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-            
-            // Close on backdrop click
-            this.element.addEventListener('click', (e) => {
-                if (e.target === this.element) {
-                    this.hide();
-                }
-            });
-
-            // Close on close button click
-            const closeBtn = this.element.querySelector('.btn-close');
-            if (closeBtn) {
-                closeBtn.addEventListener('click', () => this.hide());
-            }
-
-            // Close on Escape key
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    this.hide();
-                }
-            });
-        }
-
-        hide() {
-            this.element.classList.remove('show');
-            this.element.style.display = 'none';
-            document.body.style.overflow = '';
-            this.element.dispatchEvent(new Event('hidden.bs.modal'));
-        }
-
-        static getInstance(element) {
-            if (!element._customModal) {
-                element._customModal = new CustomModal(element);
-            }
-            return element._customModal;
-        }
-    }
-
-    // Replace Bootstrap Modal with Custom Modal
-    window.bootstrap = {
-        Modal: CustomModal
-    };
-
-    // Alert dismiss functionality
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('btn-close') && e.target.closest('.alert-dismissible')) {
-            const alert = e.target.closest('.alert-dismissible');
-            alert.style.opacity = '0';
-            alert.style.transform = 'translateY(-10px)';
-            setTimeout(() => {
-                alert.remove();
-            }, 300);
-        }
-    });
-</script>
-
-
 
 <!-- Barcode Modal -->
 <div class="modal fade" id="barcodeModal" tabindex="-1" aria-labelledby="barcodeModalLabel" aria-hidden="true">
@@ -1248,7 +896,16 @@ ob_start();
         // Populate modal with student data
         document.getElementById('modalStudentName').textContent = `${student.first_name} ${student.last_name}`;
         document.getElementById('modalBarcode').textContent = barcode;
-        document.getElementById('modalTime').textContent = new Date().toLocaleTimeString();
+        
+        // Display Philippines time specifically
+        const now = new Date();
+        const philippinesTime = now.toLocaleTimeString('en-US', {
+            timeZone: 'Asia/Manila',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+        document.getElementById('modalTime').textContent = philippinesTime;
         
         // Set hidden form values
         document.getElementById('confirmStudentId').value = student.id;
@@ -1294,9 +951,11 @@ ob_start();
             const student = findStudent(barcode);
             
             if (student) {
-                // Note: We'll let the server-side check for today's attendance
-                // Client-side is_scanned flag might not be accurate for daily attendance
-                console.log('🔍 Found student:', student.first_name, student.last_name);
+                if (student.is_scanned == 1) {
+                    alert(`⚠️ ${student.first_name} ${student.last_name} already scanned today!`);
+                    resetScanner();
+                    return;
+                }
                 
                 // Store in localStorage for confirmation
                 const scanData = {
@@ -1307,7 +966,7 @@ ob_start();
                 };
                 localStorage.setItem('pendingBarcodeScan', JSON.stringify(scanData));
                 
-                // Show confirmation modal (server will check if already scanned today)
+                // Show confirmation modal
                 showConfirmationModal(barcode, student);
                 
             } else {

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LIVE SCANNER DEBUG</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-box { 
+            background: black; 
+            color: lime; 
+            padding: 20px; 
+            height: 300px; 
+            overflow-y: scroll; 
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .scanner-input {
+            width: 100%;
+            padding: 20px;
+            font-size: 2rem;
+            border: 5px solid red;
+            text-align: center;
+            background: lightyellow;
+        }
+        .scanner-input:focus {
+            border-color: green;
+            background: lightgreen;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 LIVE SCANNER DEBUG TOOL</h1>
+    <p><strong>This shows EXACTLY what your scanner is doing in real-time</strong></p>
+    
+    <h3>🎯 SCAN HERE:</h3>
+    <input type="text" id="scannerInput" class="scanner-input" placeholder="CLICK HERE AND SCAN BARCODE" autofocus>
+    
+    <h3>📊 LIVE DEBUG LOG:</h3>
+    <div id="debugLog" class="debug-box"></div>
+    
+    <h3>📋 Current Input Value:</h3>
+    <div id="currentValue" style="background: yellow; padding: 10px; font-size: 1.5rem; font-weight: bold;"></div>
+    
+    <script>
+        const input = document.getElementById('scannerInput');
+        const log = document.getElementById('debugLog');
+        const valueDisplay = document.getElementById('currentValue');
+        
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `[${timestamp}] ${message}\n`;
+            log.scrollTop = log.scrollHeight;
+            console.log(message);
+        }
+        
+        addLog('🔥 SCANNER DEBUG STARTED - Ready to detect input!');
+        
+        // Monitor every single character input
+        input.addEventListener('input', function(e) {
+            const value = e.target.value;
+            addLog(`📥 INPUT EVENT: "${value}" (Length: ${value.length})`);
+            valueDisplay.textContent = `"${value}"`;
+            
+            // Character analysis
+            if (value.length > 0) {
+                const lastChar = value[value.length - 1];
+                const charCode = lastChar.charCodeAt(0);
+                addLog(`   └── Last character: "${lastChar}" (ASCII: ${charCode})`);
+            }
+        });
+        
+        // Monitor key presses
+        input.addEventListener('keydown', function(e) {
+            addLog(`⌨️ KEY DOWN: "${e.key}" (Code: ${e.keyCode}, Which: ${e.which})`);
+            
+            if (e.key === 'Enter') {
+                addLog('🚀 ENTER KEY DETECTED - This is what most scanners send at the end!');
+            }
+        });
+        
+        input.addEventListener('keyup', function(e) {
+            addLog(`⌨️ KEY UP: "${e.key}"`);
+        });
+        
+        // Monitor focus/blur
+        input.addEventListener('focus', function() {
+            addLog('👁️ INPUT FOCUSED - Scanner can now input data');
+        });
+        
+        input.addEventListener('blur', function() {
+            addLog('👁️ INPUT LOST FOCUS - Scanner cannot input data');
+        });
+        
+        // Monitor paste events (some scanners use clipboard)
+        input.addEventListener('paste', function(e) {
+            const pastedData = (e.clipboardData || window.clipboardData).getData('text');
+            addLog(`📋 PASTE EVENT: "${pastedData}"`);
+        });
+        
+        // Keep focus on input
+        document.addEventListener('click', function() {
+            input.focus();
+        });
+        
+        // Auto-focus every 2 seconds to ensure scanner can always input
+        setInterval(function() {
+            if (document.activeElement !== input) {
+                addLog('🔄 Auto-focusing input field...');
+                input.focus();
+            }
+        }, 2000);
+        
+        addLog('✅ All event listeners attached. Try scanning now!');
+        addLog('💡 TIP: If you see no INPUT events when scanning, your scanner might not be working properly.');
+    </script>
+</body>
+</html>

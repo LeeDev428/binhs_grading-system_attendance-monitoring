@@ -15,14 +15,16 @@ if ($_POST) {
     if (isset($_POST['add_subject'])) {
         try {
             $stmt = $pdo->prepare("
-                INSERT INTO subjects (subject_name, subject_code, grade_level, subject_type)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO subjects (subject_name, subject_code, grade_level, subject_type, is_first_sem, is_second_sem)
+                VALUES (?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
                 $_POST['subject_name'],
                 $_POST['subject_code'],
                 $_POST['grade_level'],
-                $_POST['subject_type']
+                $_POST['subject_type'],
+                isset($_POST['is_first_sem']) ? 1 : 0,
+                isset($_POST['is_second_sem']) ? 1 : 0
             ]);
             $success = 'Subject added successfully!';
         } catch (PDOException $e) {
@@ -44,7 +46,7 @@ if ($_POST) {
         try {
             $stmt = $pdo->prepare("
                 UPDATE subjects SET 
-                    subject_name = ?, subject_code = ?, grade_level = ?, subject_type = ?
+                    subject_name = ?, subject_code = ?, grade_level = ?, subject_type = ?, is_first_sem = ?, is_second_sem = ?
                 WHERE id = ?
             ");
             $stmt->execute([
@@ -52,6 +54,8 @@ if ($_POST) {
                 $_POST['subject_code'],
                 $_POST['grade_level'],
                 $_POST['subject_type'],
+                isset($_POST['is_first_sem']) ? 1 : 0,
+                isset($_POST['is_second_sem']) ? 1 : 0,
                 $_POST['subject_id']
             ]);
             $success = 'Subject updated successfully!';
@@ -411,6 +415,18 @@ ob_start();
         <div class="subject-name"><?php echo htmlspecialchars($subject['subject_name']); ?></div>
         <div class="subject-code">Code: <?php echo htmlspecialchars($subject['subject_code']); ?></div>
         <div class="subject-grade"><?php echo htmlspecialchars($subject['grade_level']); ?></div>
+        <div class="subject-semester" style="margin-bottom: 15px;">
+            <?php 
+            $semesters = [];
+            if ($subject['is_first_sem']) $semesters[] = '1st Sem';
+            if ($subject['is_second_sem']) $semesters[] = '2nd Sem';
+            if (empty($semesters)) {
+                echo '<span style="color: #999; font-style: italic;">No semester assigned</span>';
+            } else {
+                echo '<span style="color: #11998e; font-weight: 500;"><i class="fas fa-calendar-alt"></i> ' . implode(', ', $semesters) . '</span>';
+            }
+            ?>
+        </div>
         <div class="subject-actions">
             <button class="btn btn-warning btn-sm" onclick="editSubject(<?php echo htmlspecialchars(json_encode($subject)); ?>)">
                 <i class="fas fa-edit"></i> Edit
@@ -480,6 +496,23 @@ ob_start();
                 </select>
             </div>
             
+            <div class="form-group">
+                <label class="form-label">Semester Availability</label>
+                <div style="display: flex; gap: 20px; margin-top: 10px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-weight: normal;">
+                        <input type="checkbox" id="isFirstSem" name="is_first_sem" value="1">
+                        1st Semester
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; font-weight: normal;">
+                        <input type="checkbox" id="isSecondSem" name="is_second_sem" value="1">
+                        2nd Semester
+                    </label>
+                </div>
+                <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">
+                    Select which semester(s) this subject is available for
+                </small>
+            </div>
+            
             <div style="text-align: right; margin-top: 30px;">
                 <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
                 <button type="submit" class="btn btn-primary" id="submitBtn">
@@ -504,6 +537,8 @@ function openAddModal() {
     document.getElementById('subjectForm').reset();
     document.getElementById('subjectId').value = '';
     document.getElementById('formAction').name = 'add_subject';
+    document.getElementById('isFirstSem').checked = false;
+    document.getElementById('isSecondSem').checked = false;
     document.getElementById('subjectModal').style.display = 'block';
 }
 
@@ -515,6 +550,8 @@ function editSubject(subject) {
     document.getElementById('subjectCode').value = subject.subject_code;
     document.getElementById('gradeLevel').value = subject.grade_level;
     document.getElementById('subjectType').value = subject.subject_type;
+    document.getElementById('isFirstSem').checked = subject.is_first_sem == '1';
+    document.getElementById('isSecondSem').checked = subject.is_second_sem == '1';
     document.getElementById('formAction').name = 'update_subject';
     document.getElementById('subjectModal').style.display = 'block';
 }

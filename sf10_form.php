@@ -439,7 +439,7 @@ ob_start();
             </thead>
             <tbody>
                 <!-- Core Subjects -->
-                <tr><td colspan="7" class="section-title" style="font-size: 10px; padding: 3px;">CORE</td></tr>
+                <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">CORE</td></tr>
                 <?php 
                 $core_subjects = array_filter($subjects, function($s) { return $s['subject_type'] == 'CORE'; });
                 foreach ($core_subjects as $subject): 
@@ -448,8 +448,6 @@ ob_start();
                     <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
                     <td><?php echo htmlspecialchars($subject['quarter_1']); ?></td>
                     <td><?php echo htmlspecialchars($subject['quarter_2']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
                     <td><?php echo htmlspecialchars($subject['final_grade']); ?></td>
                     <td>
                         <select class="editable-field" name="action_taken_1st_<?php echo $subject['id']; ?>">
@@ -462,7 +460,7 @@ ob_start();
                 <?php endforeach; ?>
                 
                 <!-- Applied Subjects -->
-                <tr><td colspan="7" class="section-title" style="font-size: 10px; padding: 3px;">APPLIED</td></tr>
+                <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">APPLIED</td></tr>
                 <?php 
                 $applied_subjects = array_filter($subjects, function($s) { return $s['subject_type'] == 'APPLIED'; });
                 foreach ($applied_subjects as $subject): 
@@ -471,8 +469,6 @@ ob_start();
                     <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
                     <td><?php echo htmlspecialchars($subject['quarter_1']); ?></td>
                     <td><?php echo htmlspecialchars($subject['quarter_2']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
                     <td><?php echo htmlspecialchars($subject['final_grade']); ?></td>
                     <td>
                         <select class="editable-field" name="action_taken_1st_<?php echo $subject['id']; ?>">
@@ -485,7 +481,7 @@ ob_start();
                 <?php endforeach; ?>
                 
                 <!-- Specialized Subjects -->
-                <tr><td colspan="7" class="section-title" style="font-size: 10px; padding: 3px;">SPECIALIZED</td></tr>
+                <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">SPECIALIZED</td></tr>
                 <?php 
                 $specialized_subjects = array_filter($subjects, function($s) { return $s['subject_type'] == 'SPECIALIZED'; });
                 foreach ($specialized_subjects as $subject): 
@@ -494,8 +490,6 @@ ob_start();
                     <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
                     <td><?php echo htmlspecialchars($subject['quarter_1']); ?></td>
                     <td><?php echo htmlspecialchars($subject['quarter_2']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
                     <td><?php echo htmlspecialchars($subject['final_grade']); ?></td>
                     <td>
                         <select class="editable-field" name="action_taken_1st_<?php echo $subject['id']; ?>">
@@ -531,17 +525,11 @@ ob_start();
         <table class="sf10-table" style="margin-top: 15px;">
             <thead>
                 <tr>
-                    <th rowspan="2" style="width: 25%;">SUBJECTS</th>
-                    <th colspan="4">Quarter</th>
-                    <th rowspan="2" style="width: 12%;">SEM FINAL GRADE</th>
-                    <th rowspan="2" style="width: 12%;">REMEDIAL CLASS FINAL GRADE</th>
-                    <th rowspan="2" style="width: 12%;">ACTION TAKEN</th>
-                </tr>
-                <tr>
-                    <th style="width: 8%;">1ST</th>
-                    <th style="width: 8%;">2ND</th>
-                    <th style="width: 8%;">3RD</th>
-                    <th style="width: 8%;">4TH</th>
+                    <th style="width: 35%;">SUBJECTS</th>
+                    <th style="width: 16%;">SEM FINAL GRADE</th>
+                    <th style="width: 16%;">REMEDIAL CLASS MARK</th>
+                    <th style="width: 16%;">RECOMPUTED FINAL GRADE</th>
+                    <th style="width: 17%;">ACTION TAKEN</th>
                 </tr>
             </thead>
             <tbody>
@@ -549,11 +537,8 @@ ob_start();
                 <?php for ($i = 0; $i < 8; $i++): ?>
                 <tr>
                     <td><input type="text" class="editable-field" style="text-align: left;" name="remedial_1st_subject_<?php echo $i; ?>"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_1st_q1_<?php echo $i; ?>"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_1st_q2_<?php echo $i; ?>"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_1st_q3_<?php echo $i; ?>"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_1st_q4_<?php echo $i; ?>"></td>
                     <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_1st_sem_grade_<?php echo $i; ?>"></td>
+                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_1st_class_mark_<?php echo $i; ?>"></td>
                     <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_1st_final_<?php echo $i; ?>"></td>
                     <td>
                         <select class="editable-field" name="remedial_1st_action_<?php echo $i; ?>">
@@ -575,28 +560,24 @@ ob_start();
         <table class="sf10-table" style="margin-top: 15px;">
             <thead>
                 <tr>
-                    <th rowspan="2" style="width: 25%;">SUBJECTS</th>
-                    <th colspan="4">Quarter</th>
-                    <th rowspan="2" style="width: 12%;">SEM FINAL GRADE</th>
-                    <th rowspan="2" style="width: 12%;">ACTION TAKEN</th>
+                    <th rowspan="2" style="width: 40%;">SUBJECTS</th>
+                    <th colspan="2">Quarter</th>
+                    <th rowspan="2" style="width: 15%;">SEM FINAL GRADE</th>
+                    <th rowspan="2" style="width: 15%;">ACTION TAKEN</th>
                 </tr>
                 <tr>
-                    <th style="width: 10%;">3RD</th>
-                    <th style="width: 10%;">4TH</th>
-                    <th style="width: 10%;">3RD</th>
-                    <th style="width: 10%;">4TH</th>
+                    <th style="width: 15%;">3RD</th>
+                    <th style="width: 15%;">4TH</th>
                 </tr>
             </thead>
             <tbody>
                 <!-- Core Subjects -->
-                <tr><td colspan="7" class="section-title" style="font-size: 10px; padding: 3px;">CORE</td></tr>
+                <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">CORE</td></tr>
                 <?php 
                 foreach ($core_subjects as $subject): 
                 ?>
                 <tr>
                     <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
                     <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
                     <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
                     <td><?php echo htmlspecialchars($subject['final_grade']); ?></td>
@@ -611,14 +592,12 @@ ob_start();
                 <?php endforeach; ?>
                 
                 <!-- Applied Subjects -->
-                <tr><td colspan="7" class="section-title" style="font-size: 10px; padding: 3px;">APPLIED</td></tr>
+                <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">APPLIED</td></tr>
                 <?php 
                 foreach ($applied_subjects as $subject): 
                 ?>
                 <tr>
                     <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
                     <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
                     <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
                     <td><?php echo htmlspecialchars($subject['final_grade']); ?></td>
@@ -633,14 +612,12 @@ ob_start();
                 <?php endforeach; ?>
                 
                 <!-- Specialized Subjects -->
-                <tr><td colspan="7" class="section-title" style="font-size: 10px; padding: 3px;">SPECIALIZED</td></tr>
+                <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">SPECIALIZED</td></tr>
                 <?php 
                 foreach ($specialized_subjects as $subject): 
                 ?>
                 <tr>
                     <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
                     <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
                     <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
                     <td><?php echo htmlspecialchars($subject['final_grade']); ?></td>
@@ -678,17 +655,11 @@ ob_start();
         <table class="sf10-table" style="margin-top: 15px;">
             <thead>
                 <tr>
-                    <th rowspan="2" style="width: 25%;">SUBJECTS</th>
-                    <th colspan="4">Quarter</th>
-                    <th rowspan="2" style="width: 12%;">SEM FINAL GRADE</th>
-                    <th rowspan="2" style="width: 12%;">REMEDIAL CLASS FINAL GRADE</th>
-                    <th rowspan="2" style="width: 12%;">ACTION TAKEN</th>
-                </tr>
-                <tr>
-                    <th style="width: 8%;">3RD</th>
-                    <th style="width: 8%;">4TH</th>
-                    <th style="width: 8%;">3RD</th>
-                    <th style="width: 8%;">4TH</th>
+                    <th style="width: 35%;">SUBJECTS</th>
+                    <th style="width: 16%;">SEM FINAL GRADE</th>
+                    <th style="width: 16%;">REMEDIAL CLASS MARK</th>
+                    <th style="width: 16%;">RECOMPUTED FINAL GRADE</th>
+                    <th style="width: 17%;">ACTION TAKEN</th>
                 </tr>
             </thead>
             <tbody>
@@ -696,11 +667,8 @@ ob_start();
                 <?php for ($i = 0; $i < 8; $i++): ?>
                 <tr>
                     <td><input type="text" class="editable-field" style="text-align: left;" name="remedial_2nd_subject_<?php echo $i; ?>"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_2nd_q3_<?php echo $i; ?>"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_2nd_q4_<?php echo $i; ?>"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_2nd_q3_alt_<?php echo $i; ?>"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_2nd_q4_alt_<?php echo $i; ?>"></td>
                     <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_2nd_sem_grade_<?php echo $i; ?>"></td>
+                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_2nd_class_mark_<?php echo $i; ?>"></td>
                     <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_2nd_final_<?php echo $i; ?>"></td>
                     <td>
                         <select class="editable-field" name="remedial_2nd_action_<?php echo $i; ?>">

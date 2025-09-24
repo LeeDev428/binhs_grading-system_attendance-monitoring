@@ -26,7 +26,8 @@ try {
         redirect('view_grades.php');
     }
     
-    // Get student grades for remedial subjects
+    // Get student grades separated by semester
+    // 1st Semester Subjects
     $stmt = $pdo->prepare("
         SELECT s.*, 
                COALESCE(sg.quarter_1, '') as quarter_1,
@@ -37,11 +38,28 @@ try {
                COALESCE(sg.status, '') as remarks
         FROM subjects s
         LEFT JOIN student_grades sg ON s.id = sg.subject_id AND sg.student_id = ?
-        WHERE s.grade_level = ?
+        WHERE s.grade_level = ? AND s.is_first_sem = 1
         ORDER BY s.subject_type, s.subject_name
     ");
     $stmt->execute([$student_id, $student['grade_level']]);
-    $subjects = $stmt->fetchAll();
+    $first_sem_subjects = $stmt->fetchAll();
+    
+    // 2nd Semester Subjects
+    $stmt = $pdo->prepare("
+        SELECT s.*, 
+               COALESCE(sg.quarter_1, '') as quarter_1,
+               COALESCE(sg.quarter_2, '') as quarter_2,
+               COALESCE(sg.quarter_3, '') as quarter_3,
+               COALESCE(sg.quarter_4, '') as quarter_4,
+               COALESCE(sg.final_grade, '') as final_grade,
+               COALESCE(sg.status, '') as remarks
+        FROM subjects s
+        LEFT JOIN student_grades sg ON s.id = sg.subject_id AND sg.student_id = ?
+        WHERE s.grade_level = ? AND s.is_second_sem = 1
+        ORDER BY s.subject_type, s.subject_name
+    ");
+    $stmt->execute([$student_id, $student['grade_level']]);
+    $second_sem_subjects = $stmt->fetchAll();
     
     // Get or create SF10 form data
     $stmt = $pdo->prepare("SELECT * FROM sf10_forms WHERE student_id = ? AND school_year = ?");
@@ -439,11 +457,11 @@ ob_start();
             </thead>
             <tbody>
                 <!-- Core Subjects -->
-                <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">CORE</td></tr>
                 <?php 
-                $core_subjects = array_filter($subjects, function($s) { return $s['subject_type'] == 'CORE'; });
-                foreach ($core_subjects as $subject): 
-                ?>
+                $first_sem_core = array_filter($first_sem_subjects, function($s) { return $s['subject_type'] == 'CORE'; });
+                if (!empty($first_sem_core)): ?>
+                <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">CORE</td></tr>
+                <?php foreach ($first_sem_core as $subject): ?>
                 <tr>
                     <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
                     <td><?php echo htmlspecialchars($subject['quarter_1']); ?></td>
@@ -458,13 +476,14 @@ ob_start();
                     </td>
                 </tr>
                 <?php endforeach; ?>
+                <?php endif; ?>
                 
                 <!-- Applied Subjects -->
-                <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">APPLIED</td></tr>
                 <?php 
-                $applied_subjects = array_filter($subjects, function($s) { return $s['subject_type'] == 'APPLIED'; });
-                foreach ($applied_subjects as $subject): 
-                ?>
+                $first_sem_applied = array_filter($first_sem_subjects, function($s) { return $s['subject_type'] == 'APPLIED'; });
+                if (!empty($first_sem_applied)): ?>
+                <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">APPLIED</td></tr>
+                <?php foreach ($first_sem_applied as $subject): ?>
                 <tr>
                     <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
                     <td><?php echo htmlspecialchars($subject['quarter_1']); ?></td>
@@ -479,13 +498,14 @@ ob_start();
                     </td>
                 </tr>
                 <?php endforeach; ?>
+                <?php endif; ?>
                 
                 <!-- Specialized Subjects -->
-                <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">SPECIALIZED</td></tr>
                 <?php 
-                $specialized_subjects = array_filter($subjects, function($s) { return $s['subject_type'] == 'SPECIALIZED'; });
-                foreach ($specialized_subjects as $subject): 
-                ?>
+                $first_sem_specialized = array_filter($first_sem_subjects, function($s) { return $s['subject_type'] == 'SPECIALIZED'; });
+                if (!empty($first_sem_specialized)): ?>
+                <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">SPECIALIZED</td></tr>
+                <?php foreach ($first_sem_specialized as $subject): ?>
                 <tr>
                     <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
                     <td><?php echo htmlspecialchars($subject['quarter_1']); ?></td>
@@ -500,6 +520,7 @@ ob_start();
                     </td>
                 </tr>
                 <?php endforeach; ?>
+                <?php endif; ?>
             </tbody>
         </table>
         
@@ -572,10 +593,11 @@ ob_start();
             </thead>
             <tbody>
                 <!-- Core Subjects -->
-                <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">CORE</td></tr>
                 <?php 
-                foreach ($core_subjects as $subject): 
-                ?>
+                $second_sem_core = array_filter($second_sem_subjects, function($s) { return $s['subject_type'] == 'CORE'; });
+                if (!empty($second_sem_core)): ?>
+                <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">CORE</td></tr>
+                <?php foreach ($second_sem_core as $subject): ?>
                 <tr>
                     <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
                     <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
@@ -590,12 +612,14 @@ ob_start();
                     </td>
                 </tr>
                 <?php endforeach; ?>
+                <?php endif; ?>
                 
                 <!-- Applied Subjects -->
-                <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">APPLIED</td></tr>
                 <?php 
-                foreach ($applied_subjects as $subject): 
-                ?>
+                $second_sem_applied = array_filter($second_sem_subjects, function($s) { return $s['subject_type'] == 'APPLIED'; });
+                if (!empty($second_sem_applied)): ?>
+                <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">APPLIED</td></tr>
+                <?php foreach ($second_sem_applied as $subject): ?>
                 <tr>
                     <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
                     <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
@@ -610,12 +634,14 @@ ob_start();
                     </td>
                 </tr>
                 <?php endforeach; ?>
+                <?php endif; ?>
                 
                 <!-- Specialized Subjects -->
-                <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">SPECIALIZED</td></tr>
                 <?php 
-                foreach ($specialized_subjects as $subject): 
-                ?>
+                $second_sem_specialized = array_filter($second_sem_subjects, function($s) { return $s['subject_type'] == 'SPECIALIZED'; });
+                if (!empty($second_sem_specialized)): ?>
+                <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">SPECIALIZED</td></tr>
+                <?php foreach ($second_sem_specialized as $subject): ?>
                 <tr>
                     <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
                     <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
@@ -630,6 +656,7 @@ ob_start();
                     </td>
                 </tr>
                 <?php endforeach; ?>
+                <?php endif; ?>
             </tbody>
         </table>
         

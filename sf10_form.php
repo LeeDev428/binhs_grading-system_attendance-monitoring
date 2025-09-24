@@ -14,7 +14,7 @@ if (!$student_id) {
 
 // Set page variables for layout
 $current_page = 'sf10_form';
-$page_title = 'SF10 Learner\'s Record for Remedial Classes';
+$page_title = 'SF10 - Senior High School Student Permanent Record';
 
 // Get student information
 try {
@@ -420,160 +420,143 @@ ob_start();
         </div>
     </div>
 
-    <!-- Remedial Classes Records -->
+    <!-- 1ST SEMESTER - SCHOLASTIC RECORD -->
     <div class="remedial-section">
-        <div class="section-title">REMEDIAL CLASSES RECORD</div>
+        <div class="section-title">SCHOLASTIC RECORD - SEM 1ST - SY: 2023-2024</div>
+        
+        <table class="sf10-table" style="margin-top: 15px;">
+            <thead>
+                <tr>
+                    <th rowspan="2" style="width: 40%;">SUBJECTS</th>
+                    <th colspan="2">Quarter</th>
+                    <th rowspan="2" style="width: 15%;">SEM FINAL GRADE</th>
+                    <th rowspan="2" style="width: 15%;">ACTION TAKEN</th>
+                </tr>
+                <tr>
+                    <th style="width: 15%;">1ST</th>
+                    <th style="width: 15%;">2ND</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Core Subjects -->
+                <tr><td colspan="7" class="section-title" style="font-size: 10px; padding: 3px;">CORE</td></tr>
+                <?php 
+                $core_subjects = array_filter($subjects, function($s) { return $s['subject_type'] == 'CORE'; });
+                foreach ($core_subjects as $subject): 
+                ?>
+                <tr>
+                    <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_1']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_2']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['final_grade']); ?></td>
+                    <td>
+                        <select class="editable-field" name="action_taken_1st_<?php echo $subject['id']; ?>">
+                            <option value="">-</option>
+                            <option value="PASSED" <?php echo ($subject['remarks'] == 'PASSED') ? 'selected' : ''; ?>>PASSED</option>
+                            <option value="FAILED" <?php echo ($subject['remarks'] == 'FAILED') ? 'selected' : ''; ?>>FAILED</option>
+                        </select>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+                
+                <!-- Applied Subjects -->
+                <tr><td colspan="7" class="section-title" style="font-size: 10px; padding: 3px;">APPLIED</td></tr>
+                <?php 
+                $applied_subjects = array_filter($subjects, function($s) { return $s['subject_type'] == 'APPLIED'; });
+                foreach ($applied_subjects as $subject): 
+                ?>
+                <tr>
+                    <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_1']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_2']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['final_grade']); ?></td>
+                    <td>
+                        <select class="editable-field" name="action_taken_1st_<?php echo $subject['id']; ?>">
+                            <option value="">-</option>
+                            <option value="PASSED" <?php echo ($subject['remarks'] == 'PASSED') ? 'selected' : ''; ?>>PASSED</option>
+                            <option value="FAILED" <?php echo ($subject['remarks'] == 'FAILED') ? 'selected' : ''; ?>>FAILED</option>
+                        </select>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+                
+                <!-- Specialized Subjects -->
+                <tr><td colspan="7" class="section-title" style="font-size: 10px; padding: 3px;">SPECIALIZED</td></tr>
+                <?php 
+                $specialized_subjects = array_filter($subjects, function($s) { return $s['subject_type'] == 'SPECIALIZED'; });
+                foreach ($specialized_subjects as $subject): 
+                ?>
+                <tr>
+                    <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_1']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_2']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['final_grade']); ?></td>
+                    <td>
+                        <select class="editable-field" name="action_taken_1st_<?php echo $subject['id']; ?>">
+                            <option value="">-</option>
+                            <option value="PASSED" <?php echo ($subject['remarks'] == 'PASSED') ? 'selected' : ''; ?>>PASSED</option>
+                            <option value="FAILED" <?php echo ($subject['remarks'] == 'FAILED') ? 'selected' : ''; ?>>FAILED</option>
+                        </select>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        
+        <!-- General Average Section for 1st Semester -->
+        <div style="margin-top: 20px;">
+            <table style="width: 100%; font-size: 12px;">
+                <tr>
+                    <td style="width: 300px;"><strong>General Ave. for the Semester:</strong></td>
+                    <td style="width: 100px; border-bottom: 1px solid #000; text-align: center;">
+                        <input type="number" class="editable-field" step="0.01" style="font-weight: bold;" name="general_avg_1st">
+                    </td>
+                    <td style="width: 50px;"></td>
+                    <td><strong>PASSED</strong></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- 1ST SEMESTER - REMEDIAL CLASSES -->
+    <div class="remedial-section">
+        <div class="section-title">REMEDIAL CLASSES - SEM 1ST</div>
         
         <table class="sf10-table" style="margin-top: 15px;">
             <thead>
                 <tr>
                     <th rowspan="2" style="width: 25%;">SUBJECTS</th>
-                    <th colspan="4">QUARTER</th>
+                    <th colspan="4">Quarter</th>
                     <th rowspan="2" style="width: 12%;">SEM FINAL GRADE</th>
                     <th rowspan="2" style="width: 12%;">REMEDIAL CLASS FINAL GRADE</th>
                     <th rowspan="2" style="width: 12%;">ACTION TAKEN</th>
                 </tr>
                 <tr>
-                    <th style="width: 8%;">1st</th>
-                    <th style="width: 8%;">2nd</th>
-                    <th style="width: 8%;">3rd</th>
-                    <th style="width: 8%;">4th</th>
+                    <th style="width: 8%;">1ST</th>
+                    <th style="width: 8%;">2ND</th>
+                    <th style="width: 8%;">3RD</th>
+                    <th style="width: 8%;">4TH</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Core Subjects -->
-                <tr><td colspan="8" class="section-title" style="font-size: 10px; padding: 3px;">CORE SUBJECTS</td></tr>
-                <?php 
-                $core_subjects = array_filter($subjects, function($s) { return $s['subject_type'] == 'CORE'; });
-                foreach ($core_subjects as $subject): 
-                    $existing_remedial = $remedial_grades[$subject['id']] ?? null;
-                ?>
+                <!-- Empty rows for remedial subjects -->
+                <?php for ($i = 0; $i < 8; $i++): ?>
                 <tr>
-                    <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_1']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_2']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['final_grade']); ?></td>
-                    <td><input type="number" class="editable-field" name="remedial_grade_<?php echo $subject['id']; ?>" 
-                               value="<?php echo $existing_remedial ? htmlspecialchars($existing_remedial['remedial_grade']) : ''; ?>" 
-                               step="0.01" min="0" max="100"></td>
+                    <td><input type="text" class="editable-field" style="text-align: left;" name="remedial_1st_subject_<?php echo $i; ?>"></td>
+                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_1st_q1_<?php echo $i; ?>"></td>
+                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_1st_q2_<?php echo $i; ?>"></td>
+                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_1st_q3_<?php echo $i; ?>"></td>
+                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_1st_q4_<?php echo $i; ?>"></td>
+                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_1st_sem_grade_<?php echo $i; ?>"></td>
+                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_1st_final_<?php echo $i; ?>"></td>
                     <td>
-                        <select class="editable-field" name="action_taken_<?php echo $subject['id']; ?>">
-                            <option value="">-</option>
-                            <option value="PASSED" <?php echo ($existing_remedial && $existing_remedial['action_taken'] == 'PASSED') ? 'selected' : ''; ?>>PASSED</option>
-                            <option value="FAILED" <?php echo ($existing_remedial && $existing_remedial['action_taken'] == 'FAILED') ? 'selected' : ''; ?>>FAILED</option>
-                        </select>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-                
-                <!-- Add empty rows for additional subjects -->
-                <?php for ($i = count($core_subjects); $i < 8; $i++): ?>
-                <tr>
-                    <td><input type="text" class="editable-field" style="text-align: left;"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100"></td>
-                    <td>
-                        <select class="editable-field">
-                            <option value="">-</option>
-                            <option value="PASSED">PASSED</option>
-                            <option value="FAILED">FAILED</option>
-                        </select>
-                    </td>
-                </tr>
-                <?php endfor; ?>
-                
-                <!-- Applied Subjects -->
-                <tr><td colspan="8" class="section-title" style="font-size: 10px; padding: 3px;">APPLIED SUBJECTS</td></tr>
-                <?php 
-                $applied_subjects = array_filter($subjects, function($s) { return $s['subject_type'] == 'APPLIED'; });
-                foreach ($applied_subjects as $subject): 
-                    $existing_remedial = $remedial_grades[$subject['id']] ?? null;
-                ?>
-                <tr>
-                    <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_1']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_2']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['final_grade']); ?></td>
-                    <td><input type="number" class="editable-field" name="remedial_grade_<?php echo $subject['id']; ?>" 
-                               value="<?php echo $existing_remedial ? htmlspecialchars($existing_remedial['remedial_grade']) : ''; ?>" 
-                               step="0.01" min="0" max="100"></td>
-                    <td>
-                        <select class="editable-field" name="action_taken_<?php echo $subject['id']; ?>">
-                            <option value="">-</option>
-                            <option value="PASSED" <?php echo ($existing_remedial && $existing_remedial['action_taken'] == 'PASSED') ? 'selected' : ''; ?>>PASSED</option>
-                            <option value="FAILED" <?php echo ($existing_remedial && $existing_remedial['action_taken'] == 'FAILED') ? 'selected' : ''; ?>>FAILED</option>
-                        </select>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-                
-                <!-- Add empty rows for additional applied subjects -->
-                <?php for ($i = count($applied_subjects); $i < 2; $i++): ?>
-                <tr>
-                    <td><input type="text" class="editable-field" style="text-align: left;"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100"></td>
-                    <td>
-                        <select class="editable-field">
-                            <option value="">-</option>
-                            <option value="PASSED">PASSED</option>
-                            <option value="FAILED">FAILED</option>
-                        </select>
-                    </td>
-                </tr>
-                <?php endfor; ?>
-                
-                <!-- Specialized Subjects -->
-                <tr><td colspan="8" class="section-title" style="font-size: 10px; padding: 3px;">SPECIALIZED SUBJECTS</td></tr>
-                <?php 
-                $specialized_subjects = array_filter($subjects, function($s) { return $s['subject_type'] == 'SPECIALIZED'; });
-                foreach ($specialized_subjects as $subject): 
-                    $existing_remedial = $remedial_grades[$subject['id']] ?? null;
-                ?>
-                <tr>
-                    <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_1']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_2']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
-                    <td><?php echo htmlspecialchars($subject['final_grade']); ?></td>
-                    <td><input type="number" class="editable-field" name="remedial_grade_<?php echo $subject['id']; ?>" 
-                               value="<?php echo $existing_remedial ? htmlspecialchars($existing_remedial['remedial_grade']) : ''; ?>" 
-                               step="0.01" min="0" max="100"></td>
-                    <td>
-                        <select class="editable-field" name="action_taken_<?php echo $subject['id']; ?>">
-                            <option value="">-</option>
-                            <option value="PASSED" <?php echo ($existing_remedial && $existing_remedial['action_taken'] == 'PASSED') ? 'selected' : ''; ?>>PASSED</option>
-                            <option value="FAILED" <?php echo ($existing_remedial && $existing_remedial['action_taken'] == 'FAILED') ? 'selected' : ''; ?>>FAILED</option>
-                        </select>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-                
-                <!-- Add empty rows for additional specialized subjects -->
-                <?php for ($i = count($specialized_subjects); $i < 3; $i++): ?>
-                <tr>
-                    <td><input type="text" class="editable-field" style="text-align: left;"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100"></td>
-                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100"></td>
-                    <td>
-                        <select class="editable-field">
+                        <select class="editable-field" name="remedial_1st_action_<?php echo $i; ?>">
                             <option value="">-</option>
                             <option value="PASSED">PASSED</option>
                             <option value="FAILED">FAILED</option>
@@ -583,23 +566,153 @@ ob_start();
                 <?php endfor; ?>
             </tbody>
         </table>
+    </div>
+
+    <!-- 2ND SEMESTER - SCHOLASTIC RECORD -->
+    <div class="remedial-section">
+        <div class="section-title">SCHOLASTIC RECORD - SEM 2ND - SY: 2023-2024</div>
         
-        <!-- General Average Section -->
+        <table class="sf10-table" style="margin-top: 15px;">
+            <thead>
+                <tr>
+                    <th rowspan="2" style="width: 25%;">SUBJECTS</th>
+                    <th colspan="4">Quarter</th>
+                    <th rowspan="2" style="width: 12%;">SEM FINAL GRADE</th>
+                    <th rowspan="2" style="width: 12%;">ACTION TAKEN</th>
+                </tr>
+                <tr>
+                    <th style="width: 10%;">3RD</th>
+                    <th style="width: 10%;">4TH</th>
+                    <th style="width: 10%;">3RD</th>
+                    <th style="width: 10%;">4TH</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Core Subjects -->
+                <tr><td colspan="7" class="section-title" style="font-size: 10px; padding: 3px;">CORE</td></tr>
+                <?php 
+                foreach ($core_subjects as $subject): 
+                ?>
+                <tr>
+                    <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['final_grade']); ?></td>
+                    <td>
+                        <select class="editable-field" name="action_taken_2nd_<?php echo $subject['id']; ?>">
+                            <option value="">-</option>
+                            <option value="PASSED" <?php echo ($subject['remarks'] == 'PASSED') ? 'selected' : ''; ?>>PASSED</option>
+                            <option value="FAILED" <?php echo ($subject['remarks'] == 'FAILED') ? 'selected' : ''; ?>>FAILED</option>
+                        </select>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+                
+                <!-- Applied Subjects -->
+                <tr><td colspan="7" class="section-title" style="font-size: 10px; padding: 3px;">APPLIED</td></tr>
+                <?php 
+                foreach ($applied_subjects as $subject): 
+                ?>
+                <tr>
+                    <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['final_grade']); ?></td>
+                    <td>
+                        <select class="editable-field" name="action_taken_2nd_<?php echo $subject['id']; ?>">
+                            <option value="">-</option>
+                            <option value="PASSED" <?php echo ($subject['remarks'] == 'PASSED') ? 'selected' : ''; ?>>PASSED</option>
+                            <option value="FAILED" <?php echo ($subject['remarks'] == 'FAILED') ? 'selected' : ''; ?>>FAILED</option>
+                        </select>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+                
+                <!-- Specialized Subjects -->
+                <tr><td colspan="7" class="section-title" style="font-size: 10px; padding: 3px;">SPECIALIZED</td></tr>
+                <?php 
+                foreach ($specialized_subjects as $subject): 
+                ?>
+                <tr>
+                    <td style="text-align: left; padding: 4px; font-size: 10px;"><?php echo htmlspecialchars($subject['subject_name']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
+                    <td><?php echo htmlspecialchars($subject['final_grade']); ?></td>
+                    <td>
+                        <select class="editable-field" name="action_taken_2nd_<?php echo $subject['id']; ?>">
+                            <option value="">-</option>
+                            <option value="PASSED" <?php echo ($subject['remarks'] == 'PASSED') ? 'selected' : ''; ?>>PASSED</option>
+                            <option value="FAILED" <?php echo ($subject['remarks'] == 'FAILED') ? 'selected' : ''; ?>>FAILED</option>
+                        </select>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        
+        <!-- General Average Section for 2nd Semester -->
         <div style="margin-top: 20px;">
             <table style="width: 100%; font-size: 12px;">
                 <tr>
                     <td style="width: 300px;"><strong>General Ave. for the Semester:</strong></td>
                     <td style="width: 100px; border-bottom: 1px solid #000; text-align: center;">
-                        <input type="number" class="editable-field" step="0.01" style="font-weight: bold;">
+                        <input type="number" class="editable-field" step="0.01" style="font-weight: bold;" name="general_avg_2nd">
                     </td>
                     <td style="width: 50px;"></td>
-                    <td><strong>Remarks:</strong></td>
-                    <td style="border-bottom: 1px solid #000;">
-                        <input type="text" class="editable-field" style="width: 100%;">
-                    </td>
+                    <td><strong>PASSED</strong></td>
                 </tr>
             </table>
         </div>
+    </div>
+
+    <!-- 2ND SEMESTER - REMEDIAL CLASSES -->
+    <div class="remedial-section">
+        <div class="section-title">REMEDIAL CLASSES - SEM 2ND</div>
+        
+        <table class="sf10-table" style="margin-top: 15px;">
+            <thead>
+                <tr>
+                    <th rowspan="2" style="width: 25%;">SUBJECTS</th>
+                    <th colspan="4">Quarter</th>
+                    <th rowspan="2" style="width: 12%;">SEM FINAL GRADE</th>
+                    <th rowspan="2" style="width: 12%;">REMEDIAL CLASS FINAL GRADE</th>
+                    <th rowspan="2" style="width: 12%;">ACTION TAKEN</th>
+                </tr>
+                <tr>
+                    <th style="width: 8%;">3RD</th>
+                    <th style="width: 8%;">4TH</th>
+                    <th style="width: 8%;">3RD</th>
+                    <th style="width: 8%;">4TH</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Empty rows for remedial subjects -->
+                <?php for ($i = 0; $i < 8; $i++): ?>
+                <tr>
+                    <td><input type="text" class="editable-field" style="text-align: left;" name="remedial_2nd_subject_<?php echo $i; ?>"></td>
+                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_2nd_q3_<?php echo $i; ?>"></td>
+                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_2nd_q4_<?php echo $i; ?>"></td>
+                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_2nd_q3_alt_<?php echo $i; ?>"></td>
+                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_2nd_q4_alt_<?php echo $i; ?>"></td>
+                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_2nd_sem_grade_<?php echo $i; ?>"></td>
+                    <td><input type="number" class="editable-field" step="0.01" min="0" max="100" name="remedial_2nd_final_<?php echo $i; ?>"></td>
+                    <td>
+                        <select class="editable-field" name="remedial_2nd_action_<?php echo $i; ?>">
+                            <option value="">-</option>
+                            <option value="PASSED">PASSED</option>
+                            <option value="FAILED">FAILED</option>
+                        </select>
+                    </td>
+                </tr>
+                <?php endfor; ?>
+            </tbody>
+        </table>
     </div>
 
     <!-- Signatures Section -->

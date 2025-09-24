@@ -40,16 +40,30 @@ try {
         redirect('view_grades.php');
     }
     
-    // Get detailed grades
+    // Get first semester grades (for student's grade level)
     $stmt = $pdo->prepare("
-        SELECT sg.*, sub.subject_name, sub.subject_code
+        SELECT sg.*, sub.subject_name, sub.subject_code, sub.subject_type
         FROM student_grades sg
         JOIN subjects sub ON sg.subject_id = sub.id
-        WHERE sg.student_id = ?
-        ORDER BY sub.subject_name
+        WHERE sg.student_id = ? AND sub.grade_level = ? AND sub.is_first_sem = 1
+        ORDER BY sub.subject_type, sub.subject_name
     ");
-    $stmt->execute([$student_id]);
-    $grades = $stmt->fetchAll();
+    $stmt->execute([$student_id, $student['grade_level']]);
+    $first_sem_grades = $stmt->fetchAll();
+    
+    // Get second semester grades (for student's grade level)
+    $stmt = $pdo->prepare("
+        SELECT sg.*, sub.subject_name, sub.subject_code, sub.subject_type
+        FROM student_grades sg
+        JOIN subjects sub ON sg.subject_id = sub.id
+        WHERE sg.student_id = ? AND sub.grade_level = ? AND sub.is_second_sem = 1
+        ORDER BY sub.subject_type, sub.subject_name
+    ");
+    $stmt->execute([$student_id, $student['grade_level']]);
+    $second_sem_grades = $stmt->fetchAll();
+    
+    // Combine for backward compatibility with existing stats calculations
+    $grades = array_merge($first_sem_grades, $second_sem_grades);
     
     // Get honors
     $stmt = $pdo->prepare("
@@ -76,7 +90,11 @@ ob_start();
                 <i class="fas fa-user-graduate"></i>
                 <?php echo htmlspecialchars($student['first_name'] . ' ' . $student['last_name']); ?>
             </h2>
-            <p class="card-subtitle">Student Number: <?php echo htmlspecialchars($student['student_number']); ?></p>
+            <p class="card-subtitle">
+                Student Number: <?php echo htmlspecialchars($student['student_number']); ?> | 
+                Grade Level: <strong><?php echo htmlspecialchars($student['grade_level']); ?></strong> | 
+                School Year: <?php echo htmlspecialchars($student['school_year']); ?>
+            </p>
         </div>
         <div>
             <a href="view_grades.php" class="btn btn-secondary">
@@ -209,45 +227,112 @@ ob_start();
             </a>
         </div>
     <?php else: ?>
-        <div class="table-responsive">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Subject</th>
-                        <th>Quarter 1</th>
-                        <th>Quarter 2</th>
-                        <th>Quarter 3</th>
-                        <th>Quarter 4</th>
-                        <th>Final Grade</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($grades as $grade): ?>
-                    <tr>
-                        <td class="subject-name">
-                            <strong><?php echo htmlspecialchars($grade['subject_name']); ?></strong>
-                            <br><small class="text-muted"><?php echo htmlspecialchars($grade['subject_code']); ?></small>
-                        </td>
-                        <td class="grade-cell"><?php echo $grade['quarter_1'] > 0 ? number_format($grade['quarter_1'], 2) : '-'; ?></td>
-                        <td class="grade-cell"><?php echo $grade['quarter_2'] > 0 ? number_format($grade['quarter_2'], 2) : '-'; ?></td>
-                        <td class="grade-cell"><?php echo $grade['quarter_3'] > 0 ? number_format($grade['quarter_3'], 2) : '-'; ?></td>
-                        <td class="grade-cell"><?php echo $grade['quarter_4'] > 0 ? number_format($grade['quarter_4'], 2) : '-'; ?></td>
-                        <td class="final-grade-cell">
-                            <span class="grade-badge <?php echo $grade['final_grade'] >= 95 ? 'badge-excellent' : ($grade['final_grade'] >= 85 ? 'badge-good' : ($grade['final_grade'] >= 75 ? 'badge-average' : 'badge-poor')); ?>">
-                                <?php echo number_format($grade['final_grade'], 2); ?>
-                            </span>
-                        </td>
-                        <td>
-                            <span class="status-badge <?php echo $grade['status'] == 'PASSED' ? 'status-passed' : 'status-failed'; ?>">
-                                <i class="fas <?php echo $grade['status'] == 'PASSED' ? 'fa-check' : 'fa-times'; ?>"></i>
-                                <?php echo $grade['status']; ?>
-                            </span>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+        <!-- First Semester Grades -->
+        <div class="semester-section">
+            <div class="semester-header">
+                <h4 class="semester-title">
+                    <i class="fas fa-calendar-alt"></i>
+                    First Semester (Q1 & Q2) - <?php echo htmlspecialchars($student['grade_level']); ?>
+                </h4>
+            </div>
+            
+            <?php if (empty($first_sem_grades)): ?>
+                <div style="text-align: center; padding: 30px; color: #999; background: #f8f9fa; border-radius: 8px;">
+                    <i class="fas fa-info-circle"></i>
+                    <p>No first semester subjects found for <?php echo htmlspecialchars($student['grade_level']); ?></p>
+                </div>
+            <?php else: ?>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Quarter 1</th>
+                                <th>Quarter 2</th>
+                                <th>Final Grade</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($first_sem_grades as $grade): ?>
+                            <tr>
+                                <td class="subject-name">
+                                    <strong><?php echo htmlspecialchars($grade['subject_name']); ?></strong>
+                                    <br><small class="text-muted"><?php echo htmlspecialchars($grade['subject_code']); ?> - <?php echo htmlspecialchars($grade['subject_type']); ?></small>
+                                </td>
+                                <td class="grade-cell"><?php echo $grade['quarter_1'] > 0 ? number_format($grade['quarter_1'], 2) : '-'; ?></td>
+                                <td class="grade-cell"><?php echo $grade['quarter_2'] > 0 ? number_format($grade['quarter_2'], 2) : '-'; ?></td>
+                                <td class="final-grade-cell">
+                                    <span class="grade-badge <?php echo $grade['final_grade'] >= 95 ? 'badge-excellent' : ($grade['final_grade'] >= 85 ? 'badge-good' : ($grade['final_grade'] >= 75 ? 'badge-average' : 'badge-poor')); ?>">
+                                        <?php echo number_format($grade['final_grade'], 2); ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-badge <?php echo $grade['status'] == 'PASSED' ? 'status-passed' : 'status-failed'; ?>">
+                                        <i class="fas <?php echo $grade['status'] == 'PASSED' ? 'fa-check' : 'fa-times'; ?>"></i>
+                                        <?php echo $grade['status']; ?>
+                                    </span>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        </div>
+        
+        <!-- Second Semester Grades -->
+        <div class="semester-section" style="margin-top: 30px;">
+            <div class="semester-header">
+                <h4 class="semester-title">
+                    <i class="fas fa-calendar-check"></i>
+                    Second Semester (Q3 & Q4) - <?php echo htmlspecialchars($student['grade_level']); ?>
+                </h4>
+            </div>
+            
+            <?php if (empty($second_sem_grades)): ?>
+                <div style="text-align: center; padding: 30px; color: #999; background: #f8f9fa; border-radius: 8px;">
+                    <i class="fas fa-info-circle"></i>
+                    <p>No second semester subjects found for <?php echo htmlspecialchars($student['grade_level']); ?></p>
+                </div>
+            <?php else: ?>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Quarter 3</th>
+                                <th>Quarter 4</th>
+                                <th>Final Grade</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($second_sem_grades as $grade): ?>
+                            <tr>
+                                <td class="subject-name">
+                                    <strong><?php echo htmlspecialchars($grade['subject_name']); ?></strong>
+                                    <br><small class="text-muted"><?php echo htmlspecialchars($grade['subject_code']); ?> - <?php echo htmlspecialchars($grade['subject_type']); ?></small>
+                                </td>
+                                <td class="grade-cell"><?php echo $grade['quarter_3'] > 0 ? number_format($grade['quarter_3'], 2) : '-'; ?></td>
+                                <td class="grade-cell"><?php echo $grade['quarter_4'] > 0 ? number_format($grade['quarter_4'], 2) : '-'; ?></td>
+                                <td class="final-grade-cell">
+                                    <span class="grade-badge <?php echo $grade['final_grade'] >= 95 ? 'badge-excellent' : ($grade['final_grade'] >= 85 ? 'badge-good' : ($grade['final_grade'] >= 75 ? 'badge-average' : 'badge-poor')); ?>">
+                                        <?php echo number_format($grade['final_grade'], 2); ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-badge <?php echo $grade['status'] == 'PASSED' ? 'status-passed' : 'status-failed'; ?>">
+                                        <i class="fas <?php echo $grade['status'] == 'PASSED' ? 'fa-check' : 'fa-times'; ?>"></i>
+                                        <?php echo $grade['status']; ?>
+                                    </span>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
         </div>
     <?php endif; ?>
 </div>
@@ -296,6 +381,32 @@ ob_start();
         font-size: 0.9rem;
         margin-bottom: 5px;
         display: block;
+    }
+    
+    .semester-section {
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        overflow: hidden;
+        background: white;
+    }
+    
+    .semester-header {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        padding: 15px 20px;
+    }
+    
+    .semester-title {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .semester-title i {
+        font-size: 1.2rem;
     }
     
     .info-value {

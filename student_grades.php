@@ -45,27 +45,51 @@ if ($edit_student_id) {
     }
 }
 
-// Get all subjects organized by type
+// Get subjects organized by semester and type
 try {
+    // Get first semester subjects
+    $stmt = $pdo->query("SELECT * FROM subjects WHERE is_first_sem = 1 ORDER BY subject_type, subject_name");
+    $first_sem_subjects = $stmt->fetchAll();
+    
+    // Get second semester subjects
+    $stmt = $pdo->query("SELECT * FROM subjects WHERE is_second_sem = 1 ORDER BY subject_type, subject_name");
+    $second_sem_subjects = $stmt->fetchAll();
+    
+    // Get all subjects for form processing
     $stmt = $pdo->query("SELECT * FROM subjects ORDER BY subject_type, subject_name");
     $all_subjects = $stmt->fetchAll();
     
-    // Organize subjects by type
-    $subjects_by_type = [
+    // Organize first semester subjects by type
+    $first_sem_by_type = [
         'CORE' => [],
         'APPLIED' => [],
         'SPECIALIZED' => []
     ];
     
-    foreach ($all_subjects as $subject) {
+    foreach ($first_sem_subjects as $subject) {
         $type = $subject['subject_type'];
-        if (isset($subjects_by_type[$type])) {
-            $subjects_by_type[$type][] = $subject;
+        if (isset($first_sem_by_type[$type])) {
+            $first_sem_by_type[$type][] = $subject;
+        }
+    }
+    
+    // Organize second semester subjects by type
+    $second_sem_by_type = [
+        'CORE' => [],
+        'APPLIED' => [],
+        'SPECIALIZED' => []
+    ];
+    
+    foreach ($second_sem_subjects as $subject) {
+        $type = $subject['subject_type'];
+        if (isset($second_sem_by_type[$type])) {
+            $second_sem_by_type[$type][] = $subject;
         }
     }
     
 } catch (PDOException $e) {
-    $subjects_by_type = ['CORE' => [], 'APPLIED' => [], 'SPECIALIZED' => []];
+    $first_sem_by_type = ['CORE' => [], 'APPLIED' => [], 'SPECIALIZED' => []];
+    $second_sem_by_type = ['CORE' => [], 'APPLIED' => [], 'SPECIALIZED' => []];
     $error = 'Could not load subjects. Please contact administrator.';
 }
 
@@ -126,8 +150,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $q3 = floatval($_POST["q3_subject_{$subject['id']}"] ?? 0);
                 $q4 = floatval($_POST["q4_subject_{$subject['id']}"] ?? 0);
                 
-                // Calculate final grade (average of quarters)
-                $final_grade = ($q1 + $q2 + $q3 + $q4) / 4;
+                // Calculate final grade based on semester assignment
+                if ($subject['is_first_sem'] == 1) {
+                    // First semester subjects: average of Q1 and Q2
+                    $final_grade = ($q1 + $q2) / 2;
+                } elseif ($subject['is_second_sem'] == 1) {
+                    // Second semester subjects: average of Q3 and Q4
+                    $final_grade = ($q3 + $q4) / 2;
+                } else {
+                    // Year-long subjects: average of all quarters
+                    $final_grade = ($q1 + $q2 + $q3 + $q4) / 4;
+                }
+                
                 $status = $final_grade >= 75 ? 'PASSED' : 'FAILED';
                 
                 if ($status == 'FAILED') {
@@ -192,6 +226,47 @@ $default_school_year = $current_year . '-' . $next_year;
 // Start output buffering for page content
 ob_start();
 ?>
+<style>
+.semester-section {
+    margin: 30px 0;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.semester-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.semester-title {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.semester-section .subject-type-section {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+}
+
+.semester-section .subject-type-section:not(:last-child) {
+    border-bottom: 1px solid #e1e5e9;
+}
+
+.semester-section .subject-type-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e1e5e9;
+}
+
+.semester-section .grades-table th {
+    background-color: #f1f3f4;
+}
+</style>
+
 <!-- Student Information Card -->
 <div class="content-card fade-in">
     <?php if ($error): ?>
@@ -299,241 +374,459 @@ ob_start();
             <i class="fas fa-graduation-cap"></i>
             Subject Grades
         </h3>
-        <p class="card-subtitle">Enter grades for each quarter (0-100). Final grade will be calculated automatically.</p>
+        <p class="card-subtitle">Enter grades based on subject semester assignment. 1st Semester (Q1, Q2) and 2nd Semester (Q3, Q4).</p>
     </div>
     
-    <!-- Core Subjects -->
-    <div class="subject-type-section">
-        <div class="subject-type-header" onclick="toggleSection('core')">
-            <h4 class="subject-type-title">
-                <i class="fas fa-book"></i>
-                Core Subjects
-                <i class="fas fa-chevron-down toggle-icon" id="core-icon"></i>
-            </h4>
+    <!-- First Semester Section -->
+    <div class="semester-section">
+        <div class="semester-header">
+            <h3 class="semester-title">
+                <i class="fas fa-calendar-alt"></i>
+                First Semester (1st & 2nd Quarter)
+            </h3>
         </div>
-        <div class="subject-content" id="core-content">
-            <div class="table-responsive">
-                <table class="data-table grades-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 30%;">Subject</th>
-                            <th>Quarter 1</th>
-                            <th>Quarter 2</th>
-                            <th>Quarter 3</th>
-                            <th>Quarter 4</th>
-                            <th>Final Grade</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($subjects_by_type['CORE'] as $subject): 
-                            $existing_grade = $existing_grades[$subject['id']] ?? null;
-                        ?>
-                        <tr>
-                            <td class="subject-name">
-                                <strong><?php echo htmlspecialchars($subject['subject_name']); ?></strong>
-                                <br><small class="text-muted"><?php echo htmlspecialchars($subject['subject_code']); ?></small>
-                            </td>
-                            <td>
-                                <input type="number" class="grade-input quarter-grade" 
-                                       name="q1_subject_<?php echo $subject['id']; ?>" 
-                                       value="<?php echo $existing_grade ? $existing_grade['quarter_1'] : ''; ?>"
-                                       min="0" max="100" step="0.01"
-                                       data-subject="<?php echo $subject['id']; ?>" data-quarter="1"
-                                       form="gradesForm">
-                            </td>
-                            <td>
-                                <input type="number" class="grade-input quarter-grade" 
-                                       name="q2_subject_<?php echo $subject['id']; ?>" 
-                                       value="<?php echo $existing_grade ? $existing_grade['quarter_2'] : ''; ?>"
-                                       min="0" max="100" step="0.01"
-                                       data-subject="<?php echo $subject['id']; ?>" data-quarter="2"
-                                       form="gradesForm">
-                            </td>
-                            <td>
-                                <input type="number" class="grade-input quarter-grade" 
-                                       name="q3_subject_<?php echo $subject['id']; ?>" 
-                                       value="<?php echo $existing_grade ? $existing_grade['quarter_3'] : ''; ?>"
-                                       min="0" max="100" step="0.01"
-                                       data-subject="<?php echo $subject['id']; ?>" data-quarter="3"
-                                       form="gradesForm">
-                            </td>
-                            <td>
-                                <input type="number" class="grade-input quarter-grade" 
-                                       name="q4_subject_<?php echo $subject['id']; ?>" 
-                                       value="<?php echo $existing_grade ? $existing_grade['quarter_4'] : ''; ?>"
-                                       min="0" max="100" step="0.01"
-                                       data-subject="<?php echo $subject['id']; ?>" data-quarter="4"
-                                       form="gradesForm">
-                            </td>
-                            <td class="final-grade" id="final_<?php echo $subject['id']; ?>">
-                                <?php echo $existing_grade ? number_format($existing_grade['final_grade'], 2) : '-'; ?>
-                            </td>
-                            <td class="status-cell" id="status_<?php echo $subject['id']; ?>">
-                                <?php echo $existing_grade ? $existing_grade['status'] : '-'; ?>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+        
+        <?php if (!empty($first_sem_by_type['CORE'])): ?>
+        <!-- First Semester Core Subjects -->
+        <div class="subject-type-section">
+            <div class="subject-type-header" onclick="toggleSection('first-core')">
+                <h4 class="subject-type-title">
+                    <i class="fas fa-book"></i>
+                    Core Subjects
+                    <i class="fas fa-chevron-down toggle-icon" id="first-core-icon"></i>
+                </h4>
+            </div>
+            <div class="subject-content" id="first-core-content">
+                <div class="table-responsive">
+                    <table class="data-table grades-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30%;">Subject</th>
+                                <th>Quarter 1</th>
+                                <th>Quarter 2</th>
+                                <th>Semester Grade</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($first_sem_by_type['CORE'] as $subject): 
+                                $existing_grade = $existing_grades[$subject['id']] ?? null;
+                            ?>
+                            <tr>
+                                <td class="subject-name">
+                                    <strong><?php echo htmlspecialchars($subject['subject_name']); ?></strong>
+                                    <br><small class="text-muted"><?php echo htmlspecialchars($subject['subject_code']); ?></small>
+                                </td>
+                                <td>
+                                    <input type="number" class="grade-input quarter-grade" 
+                                           name="q1_subject_<?php echo $subject['id']; ?>" 
+                                           value="<?php echo $existing_grade ? $existing_grade['quarter_1'] : ''; ?>"
+                                           min="0" max="100" step="0.01"
+                                           data-subject="<?php echo $subject['id']; ?>" data-quarter="1"
+                                           form="gradesForm">
+                                </td>
+                                <td>
+                                    <input type="number" class="grade-input quarter-grade" 
+                                           name="q2_subject_<?php echo $subject['id']; ?>" 
+                                           value="<?php echo $existing_grade ? $existing_grade['quarter_2'] : ''; ?>"
+                                           min="0" max="100" step="0.01"
+                                           data-subject="<?php echo $subject['id']; ?>" data-quarter="2"
+                                           form="gradesForm">
+                                </td>
+                                <!-- Hidden Q3 and Q4 fields to maintain form consistency -->
+                                <input type="hidden" name="q3_subject_<?php echo $subject['id']; ?>" value="0" form="gradesForm">
+                                <input type="hidden" name="q4_subject_<?php echo $subject['id']; ?>" value="0" form="gradesForm">
+                                <td class="final-grade" id="final_<?php echo $subject['id']; ?>">
+                                    <?php echo $existing_grade ? number_format(($existing_grade['quarter_1'] + $existing_grade['quarter_2']) / 2, 2) : '-'; ?>
+                                </td>
+                                <td class="status-cell" id="status_<?php echo $subject['id']; ?>">
+                                    <?php 
+                                    if($existing_grade) {
+                                        $sem_avg = ($existing_grade['quarter_1'] + $existing_grade['quarter_2']) / 2;
+                                        echo $sem_avg >= 75 ? 'PASSED' : 'FAILED';
+                                    } else {
+                                        echo '-';
+                                    }
+                                    ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
+        <?php endif; ?>
+        
+        <?php if (!empty($first_sem_by_type['APPLIED'])): ?>
+        <!-- First Semester Applied Subjects -->
+        <div class="subject-type-section">
+            <div class="subject-type-header" onclick="toggleSection('first-applied')">
+                <h4 class="subject-type-title">
+                    <i class="fas fa-laptop"></i>
+                    Applied Subjects
+                    <i class="fas fa-chevron-down toggle-icon" id="first-applied-icon"></i>
+                </h4>
+            </div>
+            <div class="subject-content" id="first-applied-content">
+                <div class="table-responsive">
+                    <table class="data-table grades-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30%;">Subject</th>
+                                <th>Quarter 1</th>
+                                <th>Quarter 2</th>
+                                <th>Semester Grade</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($first_sem_by_type['APPLIED'] as $subject): 
+                                $existing_grade = $existing_grades[$subject['id']] ?? null;
+                            ?>
+                            <tr>
+                                <td class="subject-name">
+                                    <strong><?php echo htmlspecialchars($subject['subject_name']); ?></strong>
+                                    <br><small class="text-muted"><?php echo htmlspecialchars($subject['subject_code']); ?></small>
+                                </td>
+                                <td>
+                                    <input type="number" class="grade-input quarter-grade" 
+                                           name="q1_subject_<?php echo $subject['id']; ?>" 
+                                           value="<?php echo $existing_grade ? $existing_grade['quarter_1'] : ''; ?>"
+                                           min="0" max="100" step="0.01"
+                                           data-subject="<?php echo $subject['id']; ?>" data-quarter="1"
+                                           form="gradesForm">
+                                </td>
+                                <td>
+                                    <input type="number" class="grade-input quarter-grade" 
+                                           name="q2_subject_<?php echo $subject['id']; ?>" 
+                                           value="<?php echo $existing_grade ? $existing_grade['quarter_2'] : ''; ?>"
+                                           min="0" max="100" step="0.01"
+                                           data-subject="<?php echo $subject['id']; ?>" data-quarter="2"
+                                           form="gradesForm">
+                                </td>
+                                <!-- Hidden Q3 and Q4 fields to maintain form consistency -->
+                                <input type="hidden" name="q3_subject_<?php echo $subject['id']; ?>" value="0" form="gradesForm">
+                                <input type="hidden" name="q4_subject_<?php echo $subject['id']; ?>" value="0" form="gradesForm">
+                                <td class="final-grade" id="final_<?php echo $subject['id']; ?>">
+                                    <?php echo $existing_grade ? number_format(($existing_grade['quarter_1'] + $existing_grade['quarter_2']) / 2, 2) : '-'; ?>
+                                </td>
+                                <td class="status-cell" id="status_<?php echo $subject['id']; ?>">
+                                    <?php 
+                                    if($existing_grade) {
+                                        $sem_avg = ($existing_grade['quarter_1'] + $existing_grade['quarter_2']) / 2;
+                                        echo $sem_avg >= 75 ? 'PASSED' : 'FAILED';
+                                    } else {
+                                        echo '-';
+                                    }
+                                    ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+        <?php if (!empty($first_sem_by_type['SPECIALIZED'])): ?>
+        <!-- First Semester Specialized Subjects -->
+        <div class="subject-type-section">
+            <div class="subject-type-header" onclick="toggleSection('first-specialized')">
+                <h4 class="subject-type-title">
+                    <i class="fas fa-tools"></i>
+                    Specialized Subjects
+                    <i class="fas fa-chevron-down toggle-icon" id="first-specialized-icon"></i>
+                </h4>
+            </div>
+            <div class="subject-content" id="first-specialized-content">
+                <div class="table-responsive">
+                    <table class="data-table grades-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30%;">Subject</th>
+                                <th>Quarter 1</th>
+                                <th>Quarter 2</th>
+                                <th>Semester Grade</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($first_sem_by_type['SPECIALIZED'] as $subject): 
+                                $existing_grade = $existing_grades[$subject['id']] ?? null;
+                            ?>
+                            <tr>
+                                <td class="subject-name">
+                                    <strong><?php echo htmlspecialchars($subject['subject_name']); ?></strong>
+                                    <br><small class="text-muted"><?php echo htmlspecialchars($subject['subject_code']); ?></small>
+                                </td>
+                                <td>
+                                    <input type="number" class="grade-input quarter-grade" 
+                                           name="q1_subject_<?php echo $subject['id']; ?>" 
+                                           value="<?php echo $existing_grade ? $existing_grade['quarter_1'] : ''; ?>"
+                                           min="0" max="100" step="0.01"
+                                           data-subject="<?php echo $subject['id']; ?>" data-quarter="1"
+                                           form="gradesForm">
+                                </td>
+                                <td>
+                                    <input type="number" class="grade-input quarter-grade" 
+                                           name="q2_subject_<?php echo $subject['id']; ?>" 
+                                           value="<?php echo $existing_grade ? $existing_grade['quarter_2'] : ''; ?>"
+                                           min="0" max="100" step="0.01"
+                                           data-subject="<?php echo $subject['id']; ?>" data-quarter="2"
+                                           form="gradesForm">
+                                </td>
+                                <!-- Hidden Q3 and Q4 fields to maintain form consistency -->
+                                <input type="hidden" name="q3_subject_<?php echo $subject['id']; ?>" value="0" form="gradesForm">
+                                <input type="hidden" name="q4_subject_<?php echo $subject['id']; ?>" value="0" form="gradesForm">
+                                <td class="final-grade" id="final_<?php echo $subject['id']; ?>">
+                                    <?php echo $existing_grade ? number_format(($existing_grade['quarter_1'] + $existing_grade['quarter_2']) / 2, 2) : '-'; ?>
+                                </td>
+                                <td class="status-cell" id="status_<?php echo $subject['id']; ?>">
+                                    <?php 
+                                    if($existing_grade) {
+                                        $sem_avg = ($existing_grade['quarter_1'] + $existing_grade['quarter_2']) / 2;
+                                        echo $sem_avg >= 75 ? 'PASSED' : 'FAILED';
+                                    } else {
+                                        echo '-';
+                                    }
+                                    ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
     
-    <!-- Applied Subjects -->
-    <div class="subject-type-section">
-        <div class="subject-type-header" onclick="toggleSection('applied')">
-            <h4 class="subject-type-title">
-                <i class="fas fa-laptop"></i>
-                Applied Subjects
-                <i class="fas fa-chevron-down toggle-icon" id="applied-icon"></i>
-            </h4>
+    <!-- Second Semester Section -->
+    <div class="semester-section">
+        <div class="semester-header">
+            <h3 class="semester-title">
+                <i class="fas fa-calendar-alt"></i>
+                Second Semester (3rd & 4th Quarter)
+            </h3>
         </div>
-        <div class="subject-content" id="applied-content">
-            <div class="table-responsive">
-                <table class="data-table grades-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 30%;">Subject</th>
-                            <th>Quarter 1</th>
-                            <th>Quarter 2</th>
-                            <th>Quarter 3</th>
-                            <th>Quarter 4</th>
-                            <th>Final Grade</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($subjects_by_type['APPLIED'] as $subject): 
-                            $existing_grade = $existing_grades[$subject['id']] ?? null;
-                        ?>
-                        <tr>
-                            <td class="subject-name">
-                                <strong><?php echo htmlspecialchars($subject['subject_name']); ?></strong>
-                                <br><small class="text-muted"><?php echo htmlspecialchars($subject['subject_code']); ?></small>
-                            </td>
-                            <td>
-                                <input type="number" class="grade-input quarter-grade" 
-                                       name="q1_subject_<?php echo $subject['id']; ?>" 
-                                       value="<?php echo $existing_grade ? $existing_grade['quarter_1'] : ''; ?>"
-                                       min="0" max="100" step="0.01"
-                                       data-subject="<?php echo $subject['id']; ?>" data-quarter="1"
-                                       form="gradesForm">
-                            </td>
-                            <td>
-                                <input type="number" class="grade-input quarter-grade" 
-                                       name="q2_subject_<?php echo $subject['id']; ?>" 
-                                       value="<?php echo $existing_grade ? $existing_grade['quarter_2'] : ''; ?>"
-                                       min="0" max="100" step="0.01"
-                                       data-subject="<?php echo $subject['id']; ?>" data-quarter="2"
-                                       form="gradesForm">
-                            </td>
-                            <td>
-                                <input type="number" class="grade-input quarter-grade" 
-                                       name="q3_subject_<?php echo $subject['id']; ?>" 
-                                       value="<?php echo $existing_grade ? $existing_grade['quarter_3'] : ''; ?>"
-                                       min="0" max="100" step="0.01"
-                                       data-subject="<?php echo $subject['id']; ?>" data-quarter="3"
-                                       form="gradesForm">
-                            </td>
-                            <td>
-                                <input type="number" class="grade-input quarter-grade" 
-                                       name="q4_subject_<?php echo $subject['id']; ?>" 
-                                       value="<?php echo $existing_grade ? $existing_grade['quarter_4'] : ''; ?>"
-                                       min="0" max="100" step="0.01"
-                                       data-subject="<?php echo $subject['id']; ?>" data-quarter="4"
-                                       form="gradesForm">
-                            </td>
-                            <td class="final-grade" id="final_<?php echo $subject['id']; ?>">
-                                <?php echo $existing_grade ? number_format($existing_grade['final_grade'], 2) : '-'; ?>
-                            </td>
-                            <td class="status-cell" id="status_<?php echo $subject['id']; ?>">
-                                <?php echo $existing_grade ? $existing_grade['status'] : '-'; ?>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+        
+        <?php if (!empty($second_sem_by_type['CORE'])): ?>
+        <!-- Second Semester Core Subjects -->
+        <div class="subject-type-section">
+            <div class="subject-type-header" onclick="toggleSection('second-core')">
+                <h4 class="subject-type-title">
+                    <i class="fas fa-book"></i>
+                    Core Subjects
+                    <i class="fas fa-chevron-down toggle-icon" id="second-core-icon"></i>
+                </h4>
+            </div>
+            <div class="subject-content" id="second-core-content">
+                <div class="table-responsive">
+                    <table class="data-table grades-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30%;">Subject</th>
+                                <th>Quarter 3</th>
+                                <th>Quarter 4</th>
+                                <th>Semester Grade</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($second_sem_by_type['CORE'] as $subject): 
+                                $existing_grade = $existing_grades[$subject['id']] ?? null;
+                            ?>
+                            <tr>
+                                <td class="subject-name">
+                                    <strong><?php echo htmlspecialchars($subject['subject_name']); ?></strong>
+                                    <br><small class="text-muted"><?php echo htmlspecialchars($subject['subject_code']); ?></small>
+                                </td>
+                                <!-- Hidden Q1 and Q2 fields to maintain form consistency -->
+                                <input type="hidden" name="q1_subject_<?php echo $subject['id']; ?>" value="0" form="gradesForm">
+                                <input type="hidden" name="q2_subject_<?php echo $subject['id']; ?>" value="0" form="gradesForm">
+                                <td>
+                                    <input type="number" class="grade-input quarter-grade" 
+                                           name="q3_subject_<?php echo $subject['id']; ?>" 
+                                           value="<?php echo $existing_grade ? $existing_grade['quarter_3'] : ''; ?>"
+                                           min="0" max="100" step="0.01"
+                                           data-subject="<?php echo $subject['id']; ?>" data-quarter="3"
+                                           form="gradesForm">
+                                </td>
+                                <td>
+                                    <input type="number" class="grade-input quarter-grade" 
+                                           name="q4_subject_<?php echo $subject['id']; ?>" 
+                                           value="<?php echo $existing_grade ? $existing_grade['quarter_4'] : ''; ?>"
+                                           min="0" max="100" step="0.01"
+                                           data-subject="<?php echo $subject['id']; ?>" data-quarter="4"
+                                           form="gradesForm">
+                                </td>
+                                <td class="final-grade" id="final_<?php echo $subject['id']; ?>">
+                                    <?php echo $existing_grade ? number_format(($existing_grade['quarter_3'] + $existing_grade['quarter_4']) / 2, 2) : '-'; ?>
+                                </td>
+                                <td class="status-cell" id="status_<?php echo $subject['id']; ?>">
+                                    <?php 
+                                    if($existing_grade) {
+                                        $sem_avg = ($existing_grade['quarter_3'] + $existing_grade['quarter_4']) / 2;
+                                        echo $sem_avg >= 75 ? 'PASSED' : 'FAILED';
+                                    } else {
+                                        echo '-';
+                                    }
+                                    ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Specialized Subjects -->
-    <div class="subject-type-section">
-        <div class="subject-type-header" onclick="toggleSection('specialized')">
-            <h4 class="subject-type-title">
-                <i class="fas fa-tools"></i>
-                Specialized Subjects
-                <i class="fas fa-chevron-down toggle-icon" id="specialized-icon"></i>
-            </h4>
-        </div>
-        <div class="subject-content" id="specialized-content">
-            <div class="table-responsive">
-                <table class="data-table grades-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 30%;">Subject</th>
-                            <th>Quarter 1</th>
-                            <th>Quarter 2</th>
-                            <th>Quarter 3</th>
-                            <th>Quarter 4</th>
-                            <th>Final Grade</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($subjects_by_type['SPECIALIZED'] as $subject): 
-                            $existing_grade = $existing_grades[$subject['id']] ?? null;
-                        ?>
-                        <tr>
-                            <td class="subject-name">
-                                <strong><?php echo htmlspecialchars($subject['subject_name']); ?></strong>
-                                <br><small class="text-muted"><?php echo htmlspecialchars($subject['subject_code']); ?></small>
-                            </td>
-                            <td>
-                                <input type="number" class="grade-input quarter-grade" 
-                                       name="q1_subject_<?php echo $subject['id']; ?>" 
-                                       value="<?php echo $existing_grade ? $existing_grade['quarter_1'] : ''; ?>"
-                                       min="0" max="100" step="0.01"
-                                       data-subject="<?php echo $subject['id']; ?>" data-quarter="1"
-                                       form="gradesForm">
-                            </td>
-                            <td>
-                                <input type="number" class="grade-input quarter-grade" 
-                                       name="q2_subject_<?php echo $subject['id']; ?>" 
-                                       value="<?php echo $existing_grade ? $existing_grade['quarter_2'] : ''; ?>"
-                                       min="0" max="100" step="0.01"
-                                       data-subject="<?php echo $subject['id']; ?>" data-quarter="2"
-                                       form="gradesForm">
-                            </td>
-                            <td>
-                                <input type="number" class="grade-input quarter-grade" 
-                                       name="q3_subject_<?php echo $subject['id']; ?>" 
-                                       value="<?php echo $existing_grade ? $existing_grade['quarter_3'] : ''; ?>"
-                                       min="0" max="100" step="0.01"
-                                       data-subject="<?php echo $subject['id']; ?>" data-quarter="3"
-                                       form="gradesForm">
-                            </td>
-                            <td>
-                                <input type="number" class="grade-input quarter-grade" 
-                                       name="q4_subject_<?php echo $subject['id']; ?>" 
-                                       value="<?php echo $existing_grade ? $existing_grade['quarter_4'] : ''; ?>"
-                                       min="0" max="100" step="0.01"
-                                       data-subject="<?php echo $subject['id']; ?>" data-quarter="4"
-                                       form="gradesForm">
-                            </td>
-                            <td class="final-grade" id="final_<?php echo $subject['id']; ?>">
-                                <?php echo $existing_grade ? number_format($existing_grade['final_grade'], 2) : '-'; ?>
-                            </td>
-                            <td class="status-cell" id="status_<?php echo $subject['id']; ?>">
-                                <?php echo $existing_grade ? $existing_grade['status'] : '-'; ?>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+        <?php endif; ?>
+        
+        <?php if (!empty($second_sem_by_type['APPLIED'])): ?>
+        <!-- Second Semester Applied Subjects -->
+        <div class="subject-type-section">
+            <div class="subject-type-header" onclick="toggleSection('second-applied')">
+                <h4 class="subject-type-title">
+                    <i class="fas fa-laptop"></i>
+                    Applied Subjects
+                    <i class="fas fa-chevron-down toggle-icon" id="second-applied-icon"></i>
+                </h4>
+            </div>
+            <div class="subject-content" id="second-applied-content">
+                <div class="table-responsive">
+                    <table class="data-table grades-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30%;">Subject</th>
+                                <th>Quarter 3</th>
+                                <th>Quarter 4</th>
+                                <th>Semester Grade</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($second_sem_by_type['APPLIED'] as $subject): 
+                                $existing_grade = $existing_grades[$subject['id']] ?? null;
+                            ?>
+                            <tr>
+                                <td class="subject-name">
+                                    <strong><?php echo htmlspecialchars($subject['subject_name']); ?></strong>
+                                    <br><small class="text-muted"><?php echo htmlspecialchars($subject['subject_code']); ?></small>
+                                </td>
+                                <!-- Hidden Q1 and Q2 fields to maintain form consistency -->
+                                <input type="hidden" name="q1_subject_<?php echo $subject['id']; ?>" value="0" form="gradesForm">
+                                <input type="hidden" name="q2_subject_<?php echo $subject['id']; ?>" value="0" form="gradesForm">
+                                <td>
+                                    <input type="number" class="grade-input quarter-grade" 
+                                           name="q3_subject_<?php echo $subject['id']; ?>" 
+                                           value="<?php echo $existing_grade ? $existing_grade['quarter_3'] : ''; ?>"
+                                           min="0" max="100" step="0.01"
+                                           data-subject="<?php echo $subject['id']; ?>" data-quarter="3"
+                                           form="gradesForm">
+                                </td>
+                                <td>
+                                    <input type="number" class="grade-input quarter-grade" 
+                                           name="q4_subject_<?php echo $subject['id']; ?>" 
+                                           value="<?php echo $existing_grade ? $existing_grade['quarter_4'] : ''; ?>"
+                                           min="0" max="100" step="0.01"
+                                           data-subject="<?php echo $subject['id']; ?>" data-quarter="4"
+                                           form="gradesForm">
+                                </td>
+                                <td class="final-grade" id="final_<?php echo $subject['id']; ?>">
+                                    <?php echo $existing_grade ? number_format(($existing_grade['quarter_3'] + $existing_grade['quarter_4']) / 2, 2) : '-'; ?>
+                                </td>
+                                <td class="status-cell" id="status_<?php echo $subject['id']; ?>">
+                                    <?php 
+                                    if($existing_grade) {
+                                        $sem_avg = ($existing_grade['quarter_3'] + $existing_grade['quarter_4']) / 2;
+                                        echo $sem_avg >= 75 ? 'PASSED' : 'FAILED';
+                                    } else {
+                                        echo '-';
+                                    }
+                                    ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
+        <?php endif; ?>
+        
+        <?php if (!empty($second_sem_by_type['SPECIALIZED'])): ?>
+        <!-- Second Semester Specialized Subjects -->
+        <div class="subject-type-section">
+            <div class="subject-type-header" onclick="toggleSection('second-specialized')">
+                <h4 class="subject-type-title">
+                    <i class="fas fa-tools"></i>
+                    Specialized Subjects
+                    <i class="fas fa-chevron-down toggle-icon" id="second-specialized-icon"></i>
+                </h4>
+            </div>
+            <div class="subject-content" id="second-specialized-content">
+                <div class="table-responsive">
+                    <table class="data-table grades-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30%;">Subject</th>
+                                <th>Quarter 3</th>
+                                <th>Quarter 4</th>
+                                <th>Semester Grade</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($second_sem_by_type['SPECIALIZED'] as $subject): 
+                                $existing_grade = $existing_grades[$subject['id']] ?? null;
+                            ?>
+                            <tr>
+                                <td class="subject-name">
+                                    <strong><?php echo htmlspecialchars($subject['subject_name']); ?></strong>
+                                    <br><small class="text-muted"><?php echo htmlspecialchars($subject['subject_code']); ?></small>
+                                </td>
+                                <!-- Hidden Q1 and Q2 fields to maintain form consistency -->
+                                <input type="hidden" name="q1_subject_<?php echo $subject['id']; ?>" value="0" form="gradesForm">
+                                <input type="hidden" name="q2_subject_<?php echo $subject['id']; ?>" value="0" form="gradesForm">
+                                <td>
+                                    <input type="number" class="grade-input quarter-grade" 
+                                           name="q3_subject_<?php echo $subject['id']; ?>" 
+                                           value="<?php echo $existing_grade ? $existing_grade['quarter_3'] : ''; ?>"
+                                           min="0" max="100" step="0.01"
+                                           data-subject="<?php echo $subject['id']; ?>" data-quarter="3"
+                                           form="gradesForm">
+                                </td>
+                                <td>
+                                    <input type="number" class="grade-input quarter-grade" 
+                                           name="q4_subject_<?php echo $subject['id']; ?>" 
+                                           value="<?php echo $existing_grade ? $existing_grade['quarter_4'] : ''; ?>"
+                                           min="0" max="100" step="0.01"
+                                           data-subject="<?php echo $subject['id']; ?>" data-quarter="4"
+                                           form="gradesForm">
+                                </td>
+                                <td class="final-grade" id="final_<?php echo $subject['id']; ?>">
+                                    <?php echo $existing_grade ? number_format(($existing_grade['quarter_3'] + $existing_grade['quarter_4']) / 2, 2) : '-'; ?>
+                                </td>
+                                <td class="status-cell" id="status_<?php echo $subject['id']; ?>">
+                                    <?php 
+                                    if($existing_grade) {
+                                        $sem_avg = ($existing_grade['quarter_3'] + $existing_grade['quarter_4']) / 2;
+                                        echo $sem_avg >= 75 ? 'PASSED' : 'FAILED';
+                                    } else {
+                                        echo '-';
+                                    }
+                                    ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 

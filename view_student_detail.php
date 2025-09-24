@@ -40,16 +40,39 @@ try {
         redirect('view_grades.php');
     }
     
-    // Get detailed grades
+    // Get grades separated by semester
+    // First semester grades
     $stmt = $pdo->prepare("
-        SELECT sg.*, sub.subject_name, sub.subject_code
+        SELECT sg.*, sub.subject_name, sub.subject_code, sub.subject_type, sub.is_first_sem, sub.is_second_sem
+        FROM student_grades sg
+        JOIN subjects sub ON sg.subject_id = sub.id
+        WHERE sg.student_id = ? AND sub.is_first_sem = 1
+        ORDER BY sub.subject_type, sub.subject_name
+    ");
+    $stmt->execute([$student_id]);
+    $first_sem_grades = $stmt->fetchAll();
+    
+    // Second semester grades
+    $stmt = $pdo->prepare("
+        SELECT sg.*, sub.subject_name, sub.subject_code, sub.subject_type, sub.is_first_sem, sub.is_second_sem
+        FROM student_grades sg
+        JOIN subjects sub ON sg.subject_id = sub.id
+        WHERE sg.student_id = ? AND sub.is_second_sem = 1
+        ORDER BY sub.subject_type, sub.subject_name
+    ");
+    $stmt->execute([$student_id]);
+    $second_sem_grades = $stmt->fetchAll();
+    
+    // All grades for compatibility
+    $stmt = $pdo->prepare("
+        SELECT sg.*, sub.subject_name, sub.subject_code, sub.subject_type
         FROM student_grades sg
         JOIN subjects sub ON sg.subject_id = sub.id
         WHERE sg.student_id = ?
         ORDER BY sub.subject_name
     ");
     $stmt->execute([$student_id]);
-    $grades = $stmt->fetchAll();
+    $all_grades = $stmt->fetchAll();
     
     // Get honors
     $stmt = $pdo->prepare("

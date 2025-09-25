@@ -656,8 +656,8 @@ ob_start();
                 <thead>
                     <tr>
                         <th style="width: 40%;">Subjects</th>
-                        <th style="width: 15%;">Q3</th>
-                        <th style="width: 15%;">Q4</th>
+                        <th style="width: 15%;">Q1</th>
+                        <th style="width: 15%;">Q2</th>
                         <th style="width: 15%;">Final</th>
                         <th style="width: 15%;">Remarks</th>
                     </tr>

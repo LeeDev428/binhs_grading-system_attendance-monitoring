@@ -26,8 +26,7 @@ try {
         redirect('view_grades.php');
     }
     
-    // Get student grades organized by semester and subject type
-    // First get ALL subjects for this grade level, then join with grades
+    // Get first semester subjects (filtered by grade level and semester)
     $stmt = $pdo->prepare("
         SELECT s.*, 
                COALESCE(sg.quarter_1, '') as quarter_1,
@@ -38,21 +37,35 @@ try {
                COALESCE(sg.status, '') as remarks
         FROM subjects s
         LEFT JOIN student_grades sg ON s.id = sg.subject_id AND sg.student_id = ?
-        WHERE s.grade_level = ?
+        WHERE s.grade_level = ? AND s.is_first_sem = 1
         ORDER BY s.subject_type, s.subject_name
     ");
     $stmt->execute([$student_id, $student['grade_level']]);
-    $subjects = $stmt->fetchAll();
+    $first_sem_subjects = $stmt->fetchAll();
     
-    // Organize subjects by semester and type
+    // Get second semester subjects (filtered by grade level and semester)
+    $stmt = $pdo->prepare("
+        SELECT s.*, 
+               COALESCE(sg.quarter_1, '') as quarter_1,
+               COALESCE(sg.quarter_2, '') as quarter_2,
+               COALESCE(sg.quarter_3, '') as quarter_3,
+               COALESCE(sg.quarter_4, '') as quarter_4,
+               COALESCE(sg.final_grade, '') as final_grade,
+               COALESCE(sg.status, '') as remarks
+        FROM subjects s
+        LEFT JOIN student_grades sg ON s.id = sg.subject_id AND sg.student_id = ?
+        WHERE s.grade_level = ? AND s.is_second_sem = 1
+        ORDER BY s.subject_type, s.subject_name
+    ");
+    $stmt->execute([$student_id, $student['grade_level']]);
+    $second_sem_subjects = $stmt->fetchAll();
+    
+    // Organize first semester subjects by type
     $first_sem_core = [];
     $first_sem_applied = [];
     $first_sem_specialized = [];
-    $second_sem_core = [];
-    $second_sem_applied = [];
-    $second_sem_specialized = [];
     
-    foreach ($subjects as $subject) {
+    foreach ($first_sem_subjects as $subject) {
         $subject_data = [
             'name' => $subject['subject_name'],
             'quarter_1' => $subject['quarter_1'],
@@ -63,18 +76,43 @@ try {
             'remarks' => $subject['remarks']
         ];
         
-        // Add all subjects to both semesters (SF9 shows full year)
         switch ($subject['subject_type']) {
             case 'CORE':
                 $first_sem_core[] = $subject_data;
-                $second_sem_core[] = $subject_data;
                 break;
             case 'APPLIED':
                 $first_sem_applied[] = $subject_data;
-                $second_sem_applied[] = $subject_data;
                 break;
             case 'SPECIALIZED':
                 $first_sem_specialized[] = $subject_data;
+                break;
+        }
+    }
+    
+    // Organize second semester subjects by type
+    $second_sem_core = [];
+    $second_sem_applied = [];
+    $second_sem_specialized = [];
+    
+    foreach ($second_sem_subjects as $subject) {
+        $subject_data = [
+            'name' => $subject['subject_name'],
+            'quarter_1' => $subject['quarter_1'],
+            'quarter_2' => $subject['quarter_2'],
+            'quarter_3' => $subject['quarter_3'],
+            'quarter_4' => $subject['quarter_4'],
+            'final_grade' => $subject['final_grade'],
+            'remarks' => $subject['remarks']
+        ];
+        
+        switch ($subject['subject_type']) {
+            case 'CORE':
+                $second_sem_core[] = $subject_data;
+                break;
+            case 'APPLIED':
+                $second_sem_applied[] = $subject_data;
+                break;
+            case 'SPECIALIZED':
                 $second_sem_specialized[] = $subject_data;
                 break;
         }

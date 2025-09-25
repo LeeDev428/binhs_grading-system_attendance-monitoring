@@ -587,8 +587,8 @@ ob_start();
                     <th rowspan="2" style="width: 15%;">ACTION TAKEN</th>
                 </tr>
                 <tr>
-                    <th style="width: 15%;">3RD</th>
-                    <th style="width: 15%;">4TH</th>
+                    <th style="width: 15%;">1ST</th>
+                    <th style="width: 15%;">2ND</th>
                 </tr>
             </thead>
             <tbody>

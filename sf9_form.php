@@ -67,6 +67,7 @@ try {
     
     foreach ($first_sem_subjects as $subject) {
         $subject_data = [
+            'id' => $subject['id'],
             'name' => $subject['subject_name'],
             'quarter_1' => $subject['quarter_1'],
             'quarter_2' => $subject['quarter_2'],
@@ -96,6 +97,7 @@ try {
     
     foreach ($second_sem_subjects as $subject) {
         $subject_data = [
+            'id' => $subject['id'],
             'name' => $subject['subject_name'],
             'quarter_1' => $subject['quarter_1'],
             'quarter_2' => $subject['quarter_2'],
@@ -210,6 +212,9 @@ if ($_POST && isset($_POST['save_sf9'])) {
         // Handle empty values for age (convert empty string to NULL)
         $age = (!empty($_POST['age']) && is_numeric($_POST['age'])) ? (int)$_POST['age'] : null;
         
+        // Handle sex field - convert empty string to NULL for enum compatibility
+        $sex = (!empty($_POST['sex']) && in_array($_POST['sex'], ['Male', 'Female'])) ? $_POST['sex'] : null;
+        
         // Update SF9 form data
         $stmt = $pdo->prepare("
             UPDATE sf9_forms SET 
@@ -219,7 +224,7 @@ if ($_POST && isset($_POST['save_sf9'])) {
         $stmt->execute([
             $_POST['lrn'],
             $age,
-            $_POST['sex'],
+            $sex,
             $_POST['track_strand'],
             $sf9_data['id']
         ]);
@@ -274,6 +279,53 @@ if ($_POST && isset($_POST['save_sf9'])) {
                     $quarters['q2'] ?? null,
                     $quarters['q3'] ?? null,
                     $quarters['q4'] ?? null
+                ]);
+            }
+        }
+        
+        // Save grades to student_grades table
+        if (isset($_POST['grades']) && is_array($_POST['grades'])) {
+            foreach ($_POST['grades'] as $subject_id => $grade_data) {
+                // Validate and sanitize grade data - ensure empty strings become NULL
+                $quarter_1 = (isset($grade_data['q1']) && $grade_data['q1'] !== '' && is_numeric($grade_data['q1'])) ? (float)$grade_data['q1'] : null;
+                $quarter_2 = (isset($grade_data['q2']) && $grade_data['q2'] !== '' && is_numeric($grade_data['q2'])) ? (float)$grade_data['q2'] : null;
+                $quarter_3 = (isset($grade_data['q3']) && $grade_data['q3'] !== '' && is_numeric($grade_data['q3'])) ? (float)$grade_data['q3'] : null;
+                $quarter_4 = (isset($grade_data['q4']) && $grade_data['q4'] !== '' && is_numeric($grade_data['q4'])) ? (float)$grade_data['q4'] : null;
+                $final_grade = (isset($grade_data['final']) && $grade_data['final'] !== '' && is_numeric($grade_data['final'])) ? (float)$grade_data['final'] : null;
+                $remarks = (isset($grade_data['remarks']) && trim($grade_data['remarks']) !== '') ? trim($grade_data['remarks']) : '';
+                
+                // Determine status based on final grade
+                $status = 'PASSED';
+                if ($final_grade !== null && $final_grade < 75) {
+                    $status = 'FAILED';
+                }
+                
+                // Insert or update grade record
+                $stmt = $pdo->prepare("
+                    INSERT INTO student_grades (student_id, subject_id, quarter_1, quarter_2, quarter_3, quarter_4, final_grade, status, remarks, school_year, created_by)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE
+                    quarter_1 = VALUES(quarter_1),
+                    quarter_2 = VALUES(quarter_2),
+                    quarter_3 = VALUES(quarter_3),
+                    quarter_4 = VALUES(quarter_4),
+                    final_grade = VALUES(final_grade),
+                    status = VALUES(status),
+                    remarks = VALUES(remarks),
+                    updated_at = NOW()
+                ");
+                $stmt->execute([
+                    $student_id,
+                    $subject_id,
+                    $quarter_1,
+                    $quarter_2,
+                    $quarter_3,
+                    $quarter_4,
+                    $final_grade,
+                    $status,
+                    $remarks,
+                    $student['school_year'],
+                    $_SESSION['user_id'] ?? null
                 ]);
             }
         }
@@ -667,74 +719,78 @@ ob_start();
                 </thead>
                 <tbody>
                     <!-- Core Subjects -->
-                    <tr><td colspan="5" style="background-color: #e0e0e0; font-weight: bold; font-size: 9px; padding: 2px; border: 1px solid #000;">CORE SUBJECTS</td></tr>
+                    <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">CORE SUBJECTS</td></tr>
                     <?php foreach ($first_sem_core as $subject): ?>
                     <tr>
                         <td style="text-align: left; padding: 2px; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['name']); ?></td>
-                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['quarter_1']); ?></td>
-                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['quarter_2']); ?></td>
-                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['final_grade']); ?></td>
-                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['remarks']); ?></td>
+                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;">
+                            <input type="number" step="0.01" name="grades[<?php echo $subject['id']; ?>][q1]" value="<?php echo htmlspecialchars($subject['quarter_1']); ?>" 
+                                   class="editable-field" style="width: 35px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
+                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;">
+                            <input type="number" step="0.01" name="grades[<?php echo $subject['id']; ?>][q2]" value="<?php echo htmlspecialchars($subject['quarter_2']); ?>" 
+                                   class="editable-field" style="width: 35px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
+                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;">
+                            <input type="number" step="0.01" name="grades[<?php echo $subject['id']; ?>][final]" value="<?php echo htmlspecialchars($subject['final_grade']); ?>" 
+                                   class="editable-field" style="width: 50px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
+                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;">
+                            <input type="text" name="grades[<?php echo $subject['id']; ?>][remarks]" value="<?php echo htmlspecialchars($subject['remarks']); ?>" 
+                                   class="editable-field" style="width: 50px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
                     </tr>
                     <?php endforeach; ?>
-                    
-                    <!-- Add empty rows for core subjects if needed -->
-                    <?php for ($i = count($first_sem_core); $i < 8; $i++): ?>
-                    <tr>
-                        <td><input type="text" class="editable-field" style="text-align: left; font-size: 9px; padding: 1px;"></td>
-                        <td><input type="number" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                        <td><input type="number" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                        <td><input type="number" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                        <td><input type="text" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                    </tr>
-                    <?php endfor; ?>
                     
                     <!-- Applied Subjects -->
                     <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">APPLIED SUBJECTS</td></tr>
                     <?php foreach ($first_sem_applied as $subject): ?>
                     <tr>
                         <td style="text-align: left; padding: 2px; font-size: 10px;"><?php echo htmlspecialchars($subject['name']); ?></td>
-                        <td style="padding: 1px;"><?php echo htmlspecialchars($subject['quarter_1']); ?></td>
-                        <td style="padding: 1px;"><?php echo htmlspecialchars($subject['quarter_2']); ?></td>
-                        <td style="padding: 1px;"><?php echo htmlspecialchars($subject['final_grade']); ?></td>
-                        <td style="padding: 1px; font-size: 9px;"><?php echo htmlspecialchars($subject['remarks']); ?></td>
+                        <td style="padding: 1px;">
+                            <input type="number" step="0.01" name="grades[<?php echo $subject['id']; ?>][q1]" value="<?php echo htmlspecialchars($subject['quarter_1']); ?>" 
+                                   class="editable-field" style="width: 35px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
+                        <td style="padding: 1px;">
+                            <input type="number" step="0.01" name="grades[<?php echo $subject['id']; ?>][q2]" value="<?php echo htmlspecialchars($subject['quarter_2']); ?>" 
+                                   class="editable-field" style="width: 35px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
+                        <td style="padding: 1px;">
+                            <input type="number" step="0.01" name="grades[<?php echo $subject['id']; ?>][final]" value="<?php echo htmlspecialchars($subject['final_grade']); ?>" 
+                                   class="editable-field" style="width: 50px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
+                        <td style="padding: 1px; font-size: 9px;">
+                            <input type="text" name="grades[<?php echo $subject['id']; ?>][remarks]" value="<?php echo htmlspecialchars($subject['remarks']); ?>" 
+                                   class="editable-field" style="width: 50px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
                     </tr>
                     <?php endforeach; ?>
-                    
-                    <!-- Add empty rows for applied subjects if needed -->
-                    <?php for ($i = count($first_sem_applied); $i < 1; $i++): ?>
-                    <tr>
-                        <td><input type="text" class="editable-field" style="text-align: left; font-size: 9px; padding: 1px;"></td>
-                        <td><input type="number" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                        <td><input type="number" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                        <td><input type="number" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                        <td><input type="text" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                    </tr>
-                    <?php endfor; ?>
                     
                     <!-- Specialized Subjects -->
                     <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">SPECIALIZED SUBJECTS</td></tr>
                     <?php foreach ($first_sem_specialized as $subject): ?>
                     <tr>
                         <td style="text-align: left; padding: 2px; font-size: 10px;"><?php echo htmlspecialchars($subject['name']); ?></td>
-                        <td style="padding: 1px;"><?php echo htmlspecialchars($subject['quarter_1']); ?></td>
-                        <td style="padding: 1px;"><?php echo htmlspecialchars($subject['quarter_2']); ?></td>
-                        <td style="padding: 1px;"><?php echo htmlspecialchars($subject['final_grade']); ?></td>
-                        <td style="padding: 1px; font-size: 9px;"><?php echo htmlspecialchars($subject['remarks']); ?></td>
+                        <td style="padding: 1px;">
+                            <input type="number" step="0.01" name="grades[<?php echo $subject['id']; ?>][q1]" value="<?php echo htmlspecialchars($subject['quarter_1']); ?>" 
+                                   class="editable-field" style="width: 35px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
+                        <td style="padding: 1px;">
+                            <input type="number" step="0.01" name="grades[<?php echo $subject['id']; ?>][q2]" value="<?php echo htmlspecialchars($subject['quarter_2']); ?>" 
+                                   class="editable-field" style="width: 35px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
+                        <td style="padding: 1px;">
+                            <input type="number" step="0.01" name="grades[<?php echo $subject['id']; ?>][final]" value="<?php echo htmlspecialchars($subject['final_grade']); ?>" 
+                                   class="editable-field" style="width: 50px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
+                        <td style="padding: 1px; font-size: 9px;">
+                            <input type="text" name="grades[<?php echo $subject['id']; ?>][remarks]" value="<?php echo htmlspecialchars($subject['remarks']); ?>" 
+                                   class="editable-field" style="width: 50px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
                     </tr>
                     <?php endforeach; ?>
                     
-                    <!-- Add empty rows for specialized subjects if needed -->
-                    <?php for ($i = count($first_sem_specialized); $i < 2; $i++): ?>
                     <tr>
-                        <td><input type="text" class="editable-field" style="text-align: left; font-size: 9px; padding: 1px;"></td>
-                        <td><input type="number" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                        <td><input type="number" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                        <td><input type="number" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                        <td><input type="text" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                    </tr>
-                    <?php endfor; ?>
-                    
                         <td colspan="3" style="text-align: right; font-weight: bold; font-size: 10px; border: 1px solid #000; padding: 2px;">General Average for the Semester</td>
                         <td style="border: 1px solid #000; padding: 2px; text-align: center;"><input type="number" step="0.01" class="editable-field" style="font-weight: bold; width: 50px; font-size: 9px;"></td>
                         <td style="border: 1px solid #000;"></td>
@@ -759,73 +815,76 @@ ob_start();
                 </thead>
                 <tbody>
                     <!-- Core Subjects -->
-                    <tr><td colspan="5" style="background-color: #e0e0e0; font-weight: bold; font-size: 9px; padding: 2px; border: 1px solid #000;">CORE SUBJECTS</td></tr>
+                    <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">CORE SUBJECTS</td></tr>
                     <?php foreach ($second_sem_core as $subject): ?>
                     <tr>
                         <td style="text-align: left; padding: 2px; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['name']); ?></td>
-                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
-                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
-                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['final_grade']); ?></td>
-                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['remarks']); ?></td>
+                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;">
+                            <input type="number" step="0.01" name="grades[<?php echo $subject['id']; ?>][q3]" value="<?php echo htmlspecialchars($subject['quarter_3']); ?>" 
+                                   class="editable-field" style="width: 35px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
+                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;">
+                            <input type="number" step="0.01" name="grades[<?php echo $subject['id']; ?>][q4]" value="<?php echo htmlspecialchars($subject['quarter_4']); ?>" 
+                                   class="editable-field" style="width: 35px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
+                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;">
+                            <input type="number" step="0.01" name="grades[<?php echo $subject['id']; ?>][final]" value="<?php echo htmlspecialchars($subject['final_grade']); ?>" 
+                                   class="editable-field" style="width: 50px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
+                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;">
+                            <input type="text" name="grades[<?php echo $subject['id']; ?>][remarks]" value="<?php echo htmlspecialchars($subject['remarks']); ?>" 
+                                   class="editable-field" style="width: 50px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
                     </tr>
                     <?php endforeach; ?>
-                    
-                    <!-- Add empty rows for core subjects if needed -->
-                    <?php for ($i = count($second_sem_core); $i < 8; $i++): ?>
-                    <tr>
-                        <td><input type="text" class="editable-field" style="text-align: left; font-size: 9px; padding: 1px;"></td>
-                        <td><input type="number" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                        <td><input type="number" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                        <td><input type="number" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                        <td><input type="text" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                    </tr>
-                    <?php endfor; ?>
                     
                     <!-- Applied Subjects -->
                     <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">APPLIED SUBJECTS</td></tr>
                     <?php foreach ($second_sem_applied as $subject): ?>
                     <tr>
                         <td style="text-align: left; padding: 2px; font-size: 10px;"><?php echo htmlspecialchars($subject['name']); ?></td>
-                        <td style="padding: 1px;"><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
-                        <td style="padding: 1px;"><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
-                        <td style="padding: 1px;"><?php echo htmlspecialchars($subject['final_grade']); ?></td>
-                        <td style="padding: 1px; font-size: 9px;"><?php echo htmlspecialchars($subject['remarks']); ?></td>
+                        <td style="padding: 1px;">
+                            <input type="number" step="0.01" name="grades[<?php echo $subject['id']; ?>][q3]" value="<?php echo htmlspecialchars($subject['quarter_3']); ?>" 
+                                   class="editable-field" style="width: 35px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
+                        <td style="padding: 1px;">
+                            <input type="number" step="0.01" name="grades[<?php echo $subject['id']; ?>][q4]" value="<?php echo htmlspecialchars($subject['quarter_4']); ?>" 
+                                   class="editable-field" style="width: 35px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
+                        <td style="padding: 1px;">
+                            <input type="number" step="0.01" name="grades[<?php echo $subject['id']; ?>][final]" value="<?php echo htmlspecialchars($subject['final_grade']); ?>" 
+                                   class="editable-field" style="width: 50px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
+                        <td style="padding: 1px; font-size: 9px;">
+                            <input type="text" name="grades[<?php echo $subject['id']; ?>][remarks]" value="<?php echo htmlspecialchars($subject['remarks']); ?>" 
+                                   class="editable-field" style="width: 50px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
                     </tr>
                     <?php endforeach; ?>
-                    
-                    <!-- Add empty rows for applied subjects if needed -->
-                    <?php for ($i = count($second_sem_applied); $i < 1; $i++): ?>
-                    <tr>
-                        <td><input type="text" class="editable-field" style="text-align: left; font-size: 9px; padding: 1px;"></td>
-                        <td><input type="number" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                        <td><input type="number" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                        <td><input type="number" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                        <td><input type="text" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                    </tr>
-                    <?php endfor; ?>
                     
                     <!-- Specialized Subjects -->
                     <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">SPECIALIZED SUBJECTS</td></tr>
                     <?php foreach ($second_sem_specialized as $subject): ?>
                     <tr>
                         <td style="text-align: left; padding: 2px; font-size: 10px;"><?php echo htmlspecialchars($subject['name']); ?></td>
-                        <td style="padding: 1px;"><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
-                        <td style="padding: 1px;"><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
-                        <td style="padding: 1px;"><?php echo htmlspecialchars($subject['final_grade']); ?></td>
-                        <td style="padding: 1px; font-size: 9px;"><?php echo htmlspecialchars($subject['remarks']); ?></td>
+                        <td style="padding: 1px;">
+                            <input type="number" step="0.01" name="grades[<?php echo $subject['id']; ?>][q3]" value="<?php echo htmlspecialchars($subject['quarter_3']); ?>" 
+                                   class="editable-field" style="width: 35px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
+                        <td style="padding: 1px;">
+                            <input type="number" step="0.01" name="grades[<?php echo $subject['id']; ?>][q4]" value="<?php echo htmlspecialchars($subject['quarter_4']); ?>" 
+                                   class="editable-field" style="width: 35px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
+                        <td style="padding: 1px;">
+                            <input type="number" step="0.01" name="grades[<?php echo $subject['id']; ?>][final]" value="<?php echo htmlspecialchars($subject['final_grade']); ?>" 
+                                   class="editable-field" style="width: 50px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
+                        <td style="padding: 1px; font-size: 9px;">
+                            <input type="text" name="grades[<?php echo $subject['id']; ?>][remarks]" value="<?php echo htmlspecialchars($subject['remarks']); ?>" 
+                                   class="editable-field" style="width: 50px; font-size: 8px; text-align: center; padding: 1px;">
+                        </td>
                     </tr>
                     <?php endforeach; ?>
-                    
-                    <!-- Add empty rows for specialized subjects if needed -->
-                    <?php for ($i = count($second_sem_specialized); $i < 2; $i++): ?>
-                    <tr>
-                        <td><input type="text" class="editable-field" style="text-align: left; font-size: 9px; padding: 1px;"></td>
-                        <td><input type="number" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                        <td><input type="number" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                        <td><input type="number" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                        <td><input type="text" class="editable-field" style="font-size: 9px; padding: 1px;"></td>
-                    </tr>
-                    <?php endfor; ?>
                     
                     <tr>
                         <td colspan="3" style="text-align: right; font-weight: bold; font-size: 10px; border: 1px solid #000; padding: 2px;">General Average for the Semester</td>
@@ -861,8 +920,8 @@ ob_start();
                 </thead>
                 <tbody>
                     <tr>
-                        <td rowspan="2" style="border: 1px solid #000; padding: 3px; font-weight: bold; font-size: 8px;">1. Maka-Diyos</td>
-                        <td style="text-align: left; font-size: 7px; border: 1px solid #000; padding: 2px; font-style: italic;">Expresses one's spiritual beliefs while respecting the spiritual beliefs of others</td>
+                        <td rowspan="2" style="border: 1px solid #000; padding: 5px; font-weight: bold; font-size: 9px; vertical-align: top;">1. Maka-Diyos</td>
+                        <td style="text-align: left; font-size: 8px; border: 1px solid #000; padding: 5px; font-style: italic; line-height: 1.5;">Expresses one's spiritual beliefs while respecting the spiritual beliefs of others</td>
                         <td rowspan="2">
                             <select name="core_values[Maka-Diyos][q1]" class="editable-field">
                                 <option value="">-</option>
@@ -901,12 +960,12 @@ ob_start();
                         </td>
                     </tr>
                     <tr>
-                        <td style="text-align: left; font-size: 9px;">Shows adherence to ethical principles by upholding truth in all undertakings</td>
+                        <td style="text-align: left; font-size: 8px; border: 1px solid #000; padding: 5px; font-style: italic; line-height: 1.5;">Shows adherence to ethical principles by upholding truth in all undertakings</td>
                     </tr>
                     
                     <tr>
-                        <td rowspan="2"><strong>2. Makatao</strong></td>
-                        <td style="text-align: left; font-size: 9px;">Is sensitive to individual, social and cultural differences</td>
+                        <td rowspan="2" style="border: 1px solid #000; padding: 5px; font-weight: bold; font-size: 9px; vertical-align: top;">2. Makatao</td>
+                        <td style="text-align: left; font-size: 8px; border: 1px solid #000; padding: 5px; font-style: italic; line-height: 1.5;">Is sensitive to individual, social and cultural differences</td>
                         <td rowspan="2">
                             <select name="core_values[Makatao][q1]" class="editable-field">
                                 <option value="">-</option>
@@ -945,12 +1004,12 @@ ob_start();
                         </td>
                     </tr>
                     <tr>
-                        <td style="text-align: left; font-size: 9px;">Demonstrates contributions towards solidarity</td>
+                        <td style="text-align: left; font-size: 8px; border: 1px solid #000; padding: 5px; font-style: italic; line-height: 1.5;">Demonstrates contributions towards solidarity</td>
                     </tr>
                     
                     <tr>
-                        <td rowspan="2"><strong>3. Makakalikasan</strong></td>
-                        <td style="text-align: left; font-size: 9px;">Cares for the environment and utilizes resources wisely, judiciously, and economically</td>
+                        <td rowspan="2" style="border: 1px solid #000; padding: 5px; font-weight: bold; font-size: 9px; vertical-align: top;">3. Makakalikasan</td>
+                        <td style="text-align: left; font-size: 8px; border: 1px solid #000; padding: 5px; font-style: italic; line-height: 1.5;">Cares for the environment and utilizes resources wisely, judiciously, and economically</td>
                         <td rowspan="2">
                             <select name="core_values[Makakalikasan][q1]" class="editable-field">
                                 <option value="">-</option>
@@ -989,12 +1048,12 @@ ob_start();
                         </td>
                     </tr>
                     <tr>
-                        <td style="text-align: left; font-size: 9px;"></td>
+                        <td style="text-align: left; font-size: 8px; border: 1px solid #000; padding: 5px; font-style: italic; line-height: 1.5;">Recognizes one's role in being a Filipino; exercises the rights and responsibilities of a Filipino citizen</td>
                     </tr>
                     
                     <tr>
-                        <td rowspan="2"><strong>4. Makabansa</strong></td>
-                        <td style="text-align: left; font-size: 9px;">Demonstrates pride in being a Filipino; exercises the rights and responsibilities of a Filipino citizen</td>
+                        <td rowspan="2" style="border: 1px solid #000; padding: 5px; font-weight: bold; font-size: 9px; vertical-align: top;">4. Makabansa</td>
+                        <td style="text-align: left; font-size: 8px; border: 1px solid #000; padding: 5px; font-style: italic; line-height: 1.5;">Demonstrates pride in being a Filipino; exercises the rights and responsibilities of a Filipino citizen</td>
                         <td rowspan="2">
                             <select name="core_values[Makabansa][q1]" class="editable-field">
                                 <option value="">-</option>
@@ -1033,7 +1092,7 @@ ob_start();
                         </td>
                     </tr>
                     <tr>
-                        <td style="text-align: left; font-size: 9px;">Demonstrates appropriate behavior in carrying out activities in the school, community, and country</td>
+                        <td style="text-align: left; font-size: 8px; border: 1px solid #000; padding: 5px; font-style: italic; line-height: 1.5;">Demonstrates appropriate behavior in carrying out activities in the school, community, and country</td>
                     </tr>
                 </tbody>
             </table>

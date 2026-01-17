@@ -520,16 +520,12 @@ ob_start();
                         </td>
                     </tr>
                 </table>
-                <br>
-                <br>
             </div>
-            
-            <!-- Additional Info -->
-            <div>
-                <table style="width: 100%; font-size: 12px;">
-                  
-                </table>
-            </div>
+        </div>
+        
+        <!-- Right Column: Header with Logo -->
+        <div style="text-align: center;">
+            <img src="img/sf9.png" alt="SF9 Header" style="width: 100%; max-width: 100%; height: auto;">
         </div>
     </div>
 

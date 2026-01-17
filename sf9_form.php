@@ -450,20 +450,116 @@ ob_start();
 
 <form id="sf9Form" method="POST">
 <div class="sf9-container">
-    <!-- Two-Column Layout: Student Info (Left) | Header (Right) -->
-    <div style="display: grid; grid-template-columns: 40% 60%; gap: 15px; margin-bottom: 15px; align-items: start;">
+    <!-- Main Two-Column Layout: Attendance Table (Left) | Header + Student Info (Right) -->
+    <div style="display: grid; grid-template-columns: 35% 65%; gap: 20px; margin-bottom: 20px;">
         
-        <!-- Left Column: Student Information -->
-        <div style="padding-top: 10px;">
+        <!-- LEFT COLUMN: Report on Attendance -->
+        <div>
+            <div style="border: 2px solid #000; padding: 10px;">
+                <div style="text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 10px;">REPORT ON ATTENDANCE</div>
+                
+                <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid #000; padding: 3px;"></th>
+                            <th style="border: 1px solid #000; padding: 3px;">Aug</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Sept</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Oct</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Nov</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Dec</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Jan</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Feb</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Mar</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Apr</th>
+                            <th style="border: 1px solid #000; padding: 3px;">May</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Jun</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Jul</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="border: 1px solid #000; padding: 3px; font-weight: bold;">No. of school days</td>
+                            <?php for ($i = 0; $i < 13; $i++): ?>
+                            <td style="border: 1px solid #000; padding: 3px; text-align: center;"></td>
+                            <?php endfor; ?>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; padding: 3px; font-weight: bold;">No. of days present</td>
+                            <?php for ($i = 0; $i < 13; $i++): ?>
+                            <td style="border: 1px solid #000; padding: 3px; text-align: center;"></td>
+                            <?php endfor; ?>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; padding: 3px; font-weight: bold;">No. of days absent</td>
+                            <?php for ($i = 0; $i < 13; $i++): ?>
+                            <td style="border: 1px solid #000; padding: 3px; text-align: center;"></td>
+                            <?php endfor; ?>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <!-- Parent/Guardian Signature Section -->
+                <div style="margin-top: 20px;">
+                    <div style="font-weight: bold; text-align: center; font-size: 11px; margin-bottom: 10px;">PARENT/GUARDIAN'S SIGNATURE</div>
+                    <div style="font-weight: bold; font-size: 11px; margin-top: 10px;">First Semester</div>
+                    <div style="font-size: 10px; margin: 5px 0;"><em>1st Quarter</em> ___________________________</div>
+                    <div style="font-size: 10px; margin: 5px 0;"><em>2nd Quarter</em> ___________________________</div>
+                    <div style="font-weight: bold; font-size: 11px; margin-top: 10px;">Second Semester</div>
+                    <div style="font-size: 10px; margin: 5px 0;"><em>3rd Quarter</em> ___________________________</div>
+                    <div style="font-size: 10px; margin: 5px 0;"><em>4th Quarter</em> ___________________________</div>
+                </div>
+                
+                <!-- Certificate of Transfer -->
+                <div style="margin-top: 20px; text-align: center;">
+                    <div style="font-weight: bold; font-size: 11px; margin-bottom: 10px;">Certificate of Transfer</div>
+                    <div style="font-size: 10px; text-align: left;">
+                        <div style="margin: 5px 0;"><em>Admitted to Grade:</em> _____ <em>Section:</em> _________________</div>
+                        <div style="margin: 5px 0;"><em>Eligibility for Admission to Grade:</em> ___________________</div>
+                    </div>
+                </div>
+                
+                <!-- Signatures -->
+                <div style="margin-top: 20px; font-size: 10px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <div style="text-align: center; flex: 1;">
+                            <div style="border-bottom: 1px solid #000; margin: 0 5px 2px;">OLIVER P. CALIWAG</div>
+                            <div><em>Principal III</em></div>
+                        </div>
+                        <div style="text-align: center; flex: 1;">
+                            <div style="border-bottom: 1px solid #000; margin: 0 5px 2px;">ARNOLD M. ARANAYDO</div>
+                            <div><em>Class Adviser</em></div>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; font-weight: bold; margin: 15px 0 10px;">Cancellation of Eligibility to Transfer</div>
+                    <div style="margin: 5px 0;"><em>Admitted in:</em> _____________</div>
+                    <div style="margin: 5px 0;"><em>Date:</em> _____________</div>
+                    <div style="text-align: center; margin-top: 10px;">
+                        <div style="border-bottom: 1px solid #000; margin: 0 20px 2px;">OLIVER P. CALIWAG</div>
+                        <div><em>Principal III</em></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- RIGHT COLUMN: Header + Student Information -->
+        <div>
+            <!-- Header with Logos -->
+            <div style="text-align: center; margin-bottom: 15px;">
+                <img src="img/sf9.png" alt="SF9 Header" style="width: 95%; max-width: 95%; height: auto;">
+            </div>
+            
+            <!-- Student Information Fields -->
             <div>
                 <table style="width: 100%; font-size: 12px;">
                     <tr>
-                        <td style="width: 120px;"><strong>Name:</strong></td>
+                        <td style="width: 100px;"><strong>Name:</strong></td>
                         <td style="border-bottom: 1px solid #000; padding: 5px;">
                             <?php echo strtoupper(htmlspecialchars($student['last_name'] . ', ' . $student['first_name'] . ' ' . $student['middle_name'])); ?>
                         </td>
                     </tr>
-                    <tr><td colspan="2" style="height: 8px;"></td></tr>
+                    <tr><td colspan="2" style="height: 5px;"></td></tr>
                     <tr>
                         <td><strong>LRN:</strong></td>
                         <td style="border-bottom: 1px solid #000;">
@@ -471,36 +567,34 @@ ob_start();
                                    class="editable-field" style="letter-spacing: 8px; font-weight: bold; font-size: 11px;">
                         </td>
                     </tr>
-                    <tr><td colspan="2" style="height: 8px;"></td></tr>
+                    <tr><td colspan="2" style="height: 5px;"></td></tr>
                     <tr>
                         <td><strong>Grade:</strong></td>
-                        <td style="border-bottom: 1px solid #000;">
+                        <td style="border-bottom: 1px solid #000; padding: 5px;">
                             <?php echo htmlspecialchars($student['grade_level']); ?>
                         </td>
-                    </tr>
-                    <tr><td colspan="2" style="height: 8px;"></td></tr>
-                    <tr>
-                        <td><strong>School Year:</strong></td>
-                        <td style="border-bottom: 1px solid #000;">
-                            <?php echo htmlspecialchars($student['school_year']); ?>
-                        </td>
-                    </tr>
-                      <tr>
-                        <td style="width: 80px;"><strong>Section:</strong></td>
+                        <td style="width: 80px; padding-left: 10px;"><strong>Section:</strong></td>
                         <td style="border-bottom: 1px solid #000; padding: 5px;">
                             <?php echo htmlspecialchars($student['section']); ?>
                         </td>
                     </tr>
-                    <tr><td colspan="2" style="height: 8px;"></td></tr>
+                    <tr><td colspan="4" style="height: 5px;"></td></tr>
+                    <tr>
+                        <td><strong>School Year:</strong></td>
+                        <td style="border-bottom: 1px solid #000; padding: 5px;">
+                            <?php echo htmlspecialchars($student['school_year']); ?>
+                        </td>
+                    </tr>
+                    <tr><td colspan="2" style="height: 5px;"></td></tr>
                     <tr>
                         <td><strong>Track/Strand:</strong></td>
-                        <td style="border-bottom: 1px solid #000;">
+                        <td colspan="3" style="border-bottom: 1px solid #000;">
                             <input type="text" name="track_strand" 
-                                   value="<?php echo htmlspecialchars($sf9_data['track_strand'] ?? 'ABM'); ?>" 
+                                   value="<?php echo htmlspecialchars($sf9_data['track_strand'] ?? 'Academic - Accountancy, Business and Management'); ?>" 
                                    class="editable-field" style="width: 100%;">
                         </td>
                     </tr>
-                    <tr><td colspan="2" style="height: 8px;"></td></tr>
+                    <tr><td colspan="4" style="height: 5px;"></td></tr>
                     <tr>
                         <td><strong>Sex:</strong></td>
                         <td style="border-bottom: 1px solid #000;">
@@ -511,7 +605,7 @@ ob_start();
                             </select>
                         </td>
                     </tr>
-                    <tr><td colspan="2" style="height: 8px;"></td></tr>
+                    <tr><td colspan="2" style="height: 5px;"></td></tr>
                     <tr>
                         <td><strong>Age:</strong></td>
                         <td style="border-bottom: 1px solid #000;">
@@ -520,44 +614,67 @@ ob_start();
                         </td>
                     </tr>
                 </table>
+                
+                <!-- Dear Parent/Guardian Message -->
+                <div style="margin-top: 20px; font-size: 11px;">
+                    <div style="font-style: italic; margin-bottom: 10px;">Dear Parent/Guardian,</div>
+                    <div style="text-indent: 30px; margin-bottom: 10px; text-align: justify;">
+                        <em>This report card shows the ability and progress your child has made in the different learning areas as well as his/her core values.</em>
+                    </div>
+                    <div style="text-indent: 30px; text-align: justify;">
+                        <em>The school welcomes you should you desire to know more about your child's progress.</em>
+                    </div>
+                </div>
+                
+                <!-- Class Adviser Signature -->
+                <div style="text-align: right; margin-top: 30px; font-size: 11px;">
+                    <div style="border-bottom: 1px solid #000; display: inline-block; min-width: 250px; text-align: center; padding: 5px 0;">
+                        ARNOLD M. ARANAYDO
+                    </div>
+                    <div style="text-align: center;"><em>Class Adviser</em></div>
+                    
+                    <div style="margin-top: 20px; border-bottom: 1px solid #000; display: inline-block; min-width: 250px; text-align: center; padding: 5px 0;">
+                        OLIVER P. CALIWAG
+                    </div>
+                    <div style="text-align: center;"><em>Principal III</em></div>
+                </div>
             </div>
-        </div>
-        
-        <!-- Right Column: Header with Logo -->
-        <div style="text-align: center; padding: 0;">
-            <img src="img/sf9.png" alt="SF9 Header" style="width: 70%; max-width: 70%; height: auto; display: block; margin: 0 auto;">
         </div>
     </div>
 
-    <!-- Learning Progress and Achievement -->
-    <div class="section-title" style="text-align: center; margin-bottom: 20px;">REPORT ON LEARNING PROGRESS AND ACHIEVEMENT</div>
-    
-    <!-- Semester Cards Container -->
-    <div style="display: flex; gap: 15px; margin-bottom: 20px;">
-        <!-- First Semester Card -->
-        <div style="flex: 1; border: 2px solid #000; padding: 10px; height: 500px; overflow: hidden;">
-            <div class="section-title">First Semester</div>
+    <!-- Two-Column Layout: Learning Progress (Left) | Observed Values (Right) -->
+    <div style="display: grid; grid-template-columns: 50% 50%; gap: 15px; margin-bottom: 20px;">
+        
+        <!-- LEFT COLUMN: REPORT ON LEARNING PROGRESS AND ACHIEVEMENT -->
+        <div>
+            <div style="text-align: center; font-weight: bold; font-size: 13px; margin-bottom: 10px; border: 2px solid #000; padding: 5px; background-color: #f0f0f0;">
+                REPORT ON LEARNING PROGRESS AND ACHIEVEMENT
+            </div>
             
-            <table class="sf9-table" style="font-size: 11px;">
+            <!-- First Semester -->
+            <div style="border: 2px solid #000; padding: 8px; margin-bottom: 10px;">
+                <div style="text-align: center; font-weight: bold; font-size: 11px; margin-bottom: 5px; background-color: #e0e0e0; padding: 3px;">First Semester</div>
+            
+            <table style="width: 100%; border-collapse: collapse; font-size: 9px;">
                 <thead>
-                    <tr>
-                        <th style="width: 40%;">Subjects</th>
-                        <th style="width: 15%;">Q1</th>
-                        <th style="width: 15%;">Q2</th>
-                        <th style="width: 15%;">Final</th>
-                        <th style="width: 15%;">Remarks</th>
+                    <tr style="background-color: #e0e0e0;">
+                        <th style="border: 1px solid #000; padding: 2px;">Subjects</th>
+                        <th style="border: 1px solid #000; padding: 2px; width: 40px;">Quarter<br>1</th>
+                        <th style="border: 1px solid #000; padding: 2px; width: 40px;">2</th>
+                        <th style="border: 1px solid #000; padding: 2px; width: 60px;">Semester<br>Final<br>Grade</th>
+                        <th style="border: 1px solid #000; padding: 2px; width: 60px;">Remarks</th>
                     </tr>
                 </thead>
                 <tbody>
                     <!-- Core Subjects -->
-                    <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">CORE SUBJECTS</td></tr>
+                    <tr><td colspan="5" style="background-color: #e0e0e0; font-weight: bold; font-size: 9px; padding: 2px; border: 1px solid #000;">CORE SUBJECTS</td></tr>
                     <?php foreach ($first_sem_core as $subject): ?>
                     <tr>
-                        <td style="text-align: left; padding: 2px; font-size: 10px;"><?php echo htmlspecialchars($subject['name']); ?></td>
-                        <td style="padding: 1px;"><?php echo htmlspecialchars($subject['quarter_1']); ?></td>
-                        <td style="padding: 1px;"><?php echo htmlspecialchars($subject['quarter_2']); ?></td>
-                        <td style="padding: 1px;"><?php echo htmlspecialchars($subject['final_grade']); ?></td>
-                        <td style="padding: 1px; font-size: 9px;"><?php echo htmlspecialchars($subject['remarks']); ?></td>
+                        <td style="text-align: left; padding: 2px; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['name']); ?></td>
+                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['quarter_1']); ?></td>
+                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['quarter_2']); ?></td>
+                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['final_grade']); ?></td>
+                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['remarks']); ?></td>
                     </tr>
                     <?php endforeach; ?>
                     
@@ -618,39 +735,38 @@ ob_start();
                     </tr>
                     <?php endfor; ?>
                     
-                    <tr style="height: 20px;">
-                        <td colspan="3" style="text-align: center; font-weight: bold; font-size: 11px;">General Average</td>
-                        <td><input type="number" step="0.01" class="editable-field" style="font-weight: bold;"></td>
-                        <td></td>
+                        <td colspan="3" style="text-align: right; font-weight: bold; font-size: 10px; border: 1px solid #000; padding: 2px;">General Average for the Semester</td>
+                        <td style="border: 1px solid #000; padding: 2px; text-align: center;"><input type="number" step="0.01" class="editable-field" style="font-weight: bold; width: 50px; font-size: 9px;"></td>
+                        <td style="border: 1px solid #000;"></td>
                     </tr>
                 </tbody>
             </table>
-        </div>
+            </div>
 
-        <!-- Second Semester Card -->
-        <div style="flex: 1; border: 2px solid #000; padding: 10px; height: 500px; overflow: hidden;">
-            <div class="section-title">Second Semester</div>
+            <!-- Second Semester -->
+            <div style="border: 2px solid #000; padding: 8px;">
+                <div style="text-align: center; font-weight: bold; font-size: 11px; margin-bottom: 5px; background-color: #e0e0e0; padding: 3px;">Second Semester</div>
             
-            <table class="sf9-table" style="font-size: 11px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 9px;">
                 <thead>
-                    <tr>
-                        <th style="width: 40%;">Subjects</th>
-                        <th style="width: 15%;">Q1</th>
-                        <th style="width: 15%;">Q2</th>
-                        <th style="width: 15%;">Final</th>
-                        <th style="width: 15%;">Remarks</th>
+                    <tr style="background-color: #e0e0e0;">
+                        <th style="border: 1px solid #000; padding: 2px;">Subjects</th>
+                        <th style="border: 1px solid #000; padding: 2px; width: 40px;">Quarter<br>3</th>
+                        <th style="border: 1px solid #000; padding: 2px; width: 40px;">4</th>
+                        <th style="border: 1px solid #000; padding: 2px; width: 60px;">Semester<br>Final<br>Grade</th>
+                        <th style="border: 1px solid #000; padding: 2px; width: 60px;">Remarks</th>
                     </tr>
                 </thead>
                 <tbody>
                     <!-- Core Subjects -->
-                    <tr><td colspan="5" class="section-title" style="font-size: 10px; padding: 3px;">CORE SUBJECTS</td></tr>
+                    <tr><td colspan="5" style="background-color: #e0e0e0; font-weight: bold; font-size: 9px; padding: 2px; border: 1px solid #000;">CORE SUBJECTS</td></tr>
                     <?php foreach ($second_sem_core as $subject): ?>
                     <tr>
-                        <td style="text-align: left; padding: 2px; font-size: 10px;"><?php echo htmlspecialchars($subject['name']); ?></td>
-                        <td style="padding: 1px;"><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
-                        <td style="padding: 1px;"><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
-                        <td style="padding: 1px;"><?php echo htmlspecialchars($subject['final_grade']); ?></td>
-                        <td style="padding: 1px; font-size: 9px;"><?php echo htmlspecialchars($subject['remarks']); ?></td>
+                        <td style="text-align: left; padding: 2px; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['name']); ?></td>
+                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['quarter_3']); ?></td>
+                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['quarter_4']); ?></td>
+                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['final_grade']); ?></td>
+                        <td style="padding: 1px; text-align: center; font-size: 8px; border: 1px solid #000;"><?php echo htmlspecialchars($subject['remarks']); ?></td>
                     </tr>
                     <?php endforeach; ?>
                     
@@ -711,133 +827,42 @@ ob_start();
                     </tr>
                     <?php endfor; ?>
                     
-                    <tr style="height: 20px;">
-                        <td colspan="3" style="text-align: center; font-weight: bold; font-size: 11px;">General Average</td>
-                        <td><input type="number" step="0.01" class="editable-field" style="font-weight: bold;"></td>
-                        <td></td>
+                    <tr>
+                        <td colspan="3" style="text-align: right; font-weight: bold; font-size: 10px; border: 1px solid #000; padding: 2px;">General Average for the Semester</td>
+                        <td style="border: 1px solid #000; padding: 2px; text-align: center;"><input type="number" step="0.01" class="editable-field" style="font-weight: bold; width: 50px; font-size: 9px;"></td>
+                        <td style="border: 1px solid #000;"></td>
                     </tr>
                 </tbody>
             </table>
+            </div>
         </div>
-    </div>
 
-    <!-- Report on Attendance Section -->
-    <div style="border: 2px solid #000; padding: 15px; margin-top: 20px;">
-        <div class="section-title">REPORT ON ATTENDANCE</div>
-        
-        <table class="sf9-table" style="font-size: 11px;">
-            <thead>
-                <tr>
-                    <th rowspan="2" style="width: 80px;">Month</th>
-                    <th rowspan="2" style="width: 80px;">No. of School Days</th>
-                    <th rowspan="2" style="width: 80px;">No. of Days Present</th>
-                    <th rowspan="2" style="width: 80px;">No. of Days Absent</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php 
-                $months = ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
-                $total_school_days = 0;
-                $total_present = 0;
-                $total_absent = 0;
-                
-                foreach ($months as $month): 
-                    // Get existing attendance data from sf9_attendance table
-                    $attendance_data = [];
-                    try {
-                        $stmt = $pdo->prepare("SELECT * FROM sf9_attendance WHERE sf9_form_id = ? AND month = ?");
-                        $stmt->execute([$sf9_data['id'], $month]);
-                        $attendance_data = $stmt->fetch() ?: [];
-                    } catch (Exception $e) {
-                        $attendance_data = [];
-                    }
-                    
-                    // Get automatic count from daily_attendance table
-                    $auto_present = $monthly_attendance[$month]['present'] ?? 0;
-                    
-                    // Use manual data if exists, otherwise use auto-calculated
-                    $school_days = $attendance_data['school_days'] ?? 0;
-                    $present = $attendance_data['days_present'] ?? $auto_present;
-                    $absent = $attendance_data['days_absent'] ?? 0;
-                    
-                    $total_school_days += $school_days;
-                    $total_present += $present;
-                    $total_absent += $absent;
-                ?>
-                <tr>
-                    <td style="font-weight: bold; text-align: center;"><?php echo $month; ?></td>
-                    <td style="text-align: center;">
-                        <input type="number" 
-                               name="attendance[<?php echo $month; ?>][school_days]" 
-                               value="<?php echo $school_days; ?>" 
-                               class="editable-field" 
-                               style="width: 60px; text-align: center;" 
-                               min="0" max="31">
-                    </td>
-                    <td style="text-align: center; background-color: #e8f5e8;">
-                        <input type="number" 
-                               name="attendance[<?php echo $month; ?>][present]" 
-                               value="<?php echo $present; ?>" 
-                               class="editable-field auto-calculated" 
-                               style="width: 60px; text-align: center; background-color: #e8f5e8;" 
-                               min="0" max="31"
-                               title="Auto-calculated from scanner data: <?php echo $auto_present; ?> days">
-                        <small style="display: block; color: #666; font-size: 8px;">
-                            Auto: <?php echo $auto_present; ?>
-                        </small>
-                    </td>
-                    <td style="text-align: center;">
-                        <input type="number" 
-                               name="attendance[<?php echo $month; ?>][absent]" 
-                               value="<?php echo $absent; ?>" 
-                               class="editable-field" 
-                               style="width: 60px; text-align: center;" 
-                               min="0" max="31">
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-                
-                <!-- Totals Row -->
-                <tr style="background-color: #f0f0f0; font-weight: bold;">
-                    <td style="text-align: center;">TOTAL</td>
-                    <td style="text-align: center;" id="totalSchoolDays"><?php echo $total_school_days; ?></td>
-                    <td style="text-align: center; background-color: #d4f4d4;" id="totalPresent"><?php echo $total_present; ?></td>
-                    <td style="text-align: center;" id="totalAbsent"><?php echo $total_absent; ?></td>
-                </tr>
-            </tbody>
-        </table>
-        
-        <div style="margin-top: 10px; font-size: 10px; color: #666;">
-            <strong>Note:</strong> 
-            <span style="background-color: #e8f5e8; padding: 2px 4px; border-radius: 3px;">Green highlighted fields</span> 
-            are automatically calculated from barcode scanner attendance data. You can manually override these values if needed.
-        </div>
-    </div>
-
-    <!-- Core Values Section (Landscape Layout) -->
-    <div class="core-values-section">
-        <!-- Core Values -->
-        <div style="border: 2px solid #000; padding: 15px;">
-            <div class="section-title">REPORT ON LEARNER'S OBSERVED VALUES</div>
+        <!-- RIGHT COLUMN: REPORT ON LEARNER'S OBSERVED VALUES -->
+        <div>
+            <div style="text-align: center; font-weight: bold; font-size: 13px; margin-bottom: 10px; border: 2px solid #000; padding: 5px; background-color: #f0f0f0;">
+                REPORT ON LEARNER'S OBSERVED VALUES
+            </div>
             
-            <table class="sf9-table">
+            <div style="border: 2px solid #000; padding: 8px;">
+            
+            <table style="width: 100%; border-collapse: collapse; font-size: 9px;">
                 <thead>
-                    <tr>
-                        <th rowspan="2">Core Values</th>
-                        <th rowspan="2">Behavior Statements</th>
-                        <th colspan="4">Quarter</th>
+                    <tr style="background-color: #e0e0e0;">
+                        <th rowspan="2" style="border: 1px solid #000; padding: 2px;">Core Values</th>
+                        <th rowspan="2" style="border: 1px solid #000; padding: 2px;">Behavior Statements</th>
+                        <th colspan="4" style="border: 1px solid #000; padding: 2px;">Quarter</th>
                     </tr>
-                    <tr>
-                        <th>1</th>
-                        <th>2</th>
-                        <th>3</th>
-                        <th>4</th>
+                    <tr style="background-color: #e0e0e0;">
+                        <th style="border: 1px solid #000; padding: 2px; width: 40px;">1</th>
+                        <th style="border: 1px solid #000; padding: 2px; width: 40px;">2</th>
+                        <th style="border: 1px solid #000; padding: 2px; width: 40px;">3</th>
+                        <th style="border: 1px solid #000; padding: 2px; width: 40px;">4</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td rowspan="2"><strong>1. Maka-Diyos</strong></td>
-                        <td style="text-align: left; font-size: 9px;">Expresses one's spiritual beliefs while respecting the spiritual beliefs of others</td>
+                        <td rowspan="2" style="border: 1px solid #000; padding: 3px; font-weight: bold; font-size: 8px;">1. Maka-Diyos</td>
+                        <td style="text-align: left; font-size: 7px; border: 1px solid #000; padding: 2px; font-style: italic;">Expresses one's spiritual beliefs while respecting the spiritual beliefs of others</td>
                         <td rowspan="2">
                             <select name="core_values[Maka-Diyos][q1]" class="editable-field">
                                 <option value="">-</option>
@@ -1027,52 +1052,22 @@ ob_start();
                 </div>
                 
                 <div style="flex: 1; font-size: 10px;">
-                    <div><strong>Learner Progress and Achievement</strong></div>
-                    <table style="width: 100%; margin-top: 5px; border: 1px solid #000;">
-                        <tr><td style="border: 1px solid #000; padding: 3px;"><strong>Descriptors</strong></td><td style="border: 1px solid #000; padding: 3px;"><strong>Grading Scale</strong></td><td style="border: 1px solid #000; padding: 3px;"><strong>Remarks</strong></td></tr>
-                        <tr><td style="border: 1px solid #000; padding: 3px;">Outstanding</td><td style="border: 1px solid #000; padding: 3px;">90-100</td><td style="border: 1px solid #000; padding: 3px;">Passed</td></tr>
-                        <tr><td style="border: 1px solid #000; padding: 3px;">Very Satisfactory</td><td style="border: 1px solid #000; padding: 3px;">85-89</td><td style="border: 1px solid #000; padding: 3px;">Passed</td></tr>
-                        <tr><td style="border: 1px solid #000; padding: 3px;">Satisfactory</td><td style="border: 1px solid #000; padding: 3px;">80-84</td><td style="border: 1px solid #000; padding: 3px;">Passed</td></tr>
-                        <tr><td style="border: 1px solid #000; padding: 3px;">Fairly Satisfactory</td><td style="border: 1px solid #000; padding: 3px;">75-79</td><td style="border: 1px solid #000; padding: 3px;">Passed</td></tr>
-                        <tr><td style="border: 1px solid #000; padding: 3px;">Did Not Meet Expectations</td><td style="border: 1px solid #000; padding: 3px;">Below 75</td><td style="border: 1px solid #000; padding: 3px;">Failed</td></tr>
+                    <div style="margin-top: 15px; font-size: 8px; font-weight: bold;">Learner Progress and Achievement</div>
+                    <table style="width: 100%; margin-top: 5px; border-collapse: collapse; font-size: 7px;">
+                        <tr style="background-color: #e0e0e0;"><td style="border: 1px solid #000; padding: 2px; font-weight: bold;">Descriptors</td><td style="border: 1px solid #000; padding: 2px; font-weight: bold;">Grading Scale</td><td style="border: 1px solid #000; padding: 2px; font-weight: bold;">Remarks</td></tr>
+                        <tr><td style="border: 1px solid #000; padding: 2px;">Outstanding</td><td style="border: 1px solid #000; padding: 2px;">90-100</td><td style="border: 1px solid #000; padding: 2px;">Passed</td></tr>
+                        <tr><td style="border: 1px solid #000; padding: 2px;">Very Satisfactory</td><td style="border: 1px solid #000; padding: 2px;">85-89</td><td style="border: 1px solid #000; padding: 2px;">Passed</td></tr>
+                        <tr><td style="border: 1px solid #000; padding: 2px;">Satisfactory</td><td style="border: 1px solid #000; padding: 2px;">80-84</td><td style="border: 1px solid #000; padding: 2px;">Passed</td></tr>
+                        <tr><td style="border: 1px solid #000; padding: 2px;">Fairly Satisfactory</td><td style="border: 1px solid #000; padding: 2px;">75-79</td><td style="border: 1px solid #000; padding: 2px;">Passed</td></tr>
+                        <tr><td style="border: 1px solid #000; padding: 2px;">Did Not Meet Expectations</td><td style="border: 1px solid #000; padding: 2px;">Below 75</td><td style="border: 1px solid #000; padding: 2px;">Failed</td></tr>
                     </table>
                 </div>
+            </div>
             </div>
         </div>
     </div>
 
-    <!-- Signatures Section -->
-    <div style="display: flex; gap: 15px; margin-top: 20px;">
-        <div style="flex: 1; border: 1px solid #000; padding: 10px; font-size: 11px;">
-            <div style="text-align: center; font-weight: bold; margin-bottom: 15px;">PARENT/GUARDIAN'S SIGNATURE</div>
-            <div style="margin: 10px 0;">
-                <div><strong>1st Quarter:</strong></div>
-                <div style="border-bottom: 1px solid #000; height: 25px; margin: 5px 0;"></div>
-            </div>
-            <div style="margin: 10px 0;">
-                <div><strong>2nd Quarter:</strong></div>
-                <div style="border-bottom: 1px solid #000; height: 25px; margin: 5px 0;"></div>
-            </div>
-            <div style="margin: 10px 0;">
-                <div><strong>3rd Quarter:</strong></div>
-                <div style="border-bottom: 1px solid #000; height: 25px; margin: 5px 0;"></div>
-            </div>
-            <div style="margin: 10px 0;">
-                <div><strong>4th Quarter:</strong></div>
-                <div style="border-bottom: 1px solid #000; height: 25px; margin: 5px 0;"></div>
-            </div>
-        </div>
-
-        <div style="flex: 1; border: 1px solid #000; padding: 10px; font-size: 11px;">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <div style="border-bottom: 1px solid #000; width: 200px; margin: 0 auto 5px; height: 25px;"></div>
-                <div><strong>Class Adviser</strong></div>
-            </div>
-            <div style="text-align: center; margin-top: 50px;">
-                <div style="border-bottom: 1px solid #000; width: 200px; margin: 0 auto 5px; height: 25px;"></div>
-                <div><strong>Principal</strong></div>
-            </div>
-        </div>
+  
     </div>
 
     <input type="hidden" name="save_sf9" value="1">

@@ -451,10 +451,10 @@ ob_start();
 <form id="sf9Form" method="POST">
 <div class="sf9-container">
     <!-- Two-Column Layout: Student Info (Left) | Header (Right) -->
-    <div style="display: grid; grid-template-columns: 35% 65%; gap: 20px; margin-bottom: 20px; align-items: start;">
+    <div style="display: grid; grid-template-columns: 40% 60%; gap: 15px; margin-bottom: 15px; align-items: start;">
         
         <!-- Left Column: Student Information -->
-        <div>
+        <div style="padding-top: 10px;">
             <div>
                 <table style="width: 100%; font-size: 12px;">
                     <tr>
@@ -524,8 +524,8 @@ ob_start();
         </div>
         
         <!-- Right Column: Header with Logo -->
-        <div style="text-align: center;">
-            <img src="img/sf9.png" alt="SF9 Header" style="width: 100%; max-width: 100%; height: auto;">
+        <div style="text-align: center; padding: 0;">
+            <img src="img/sf9.png" alt="SF9 Header" style="width: 70%; max-width: 70%; height: auto; display: block; margin: 0 auto;">
         </div>
     </div>
 

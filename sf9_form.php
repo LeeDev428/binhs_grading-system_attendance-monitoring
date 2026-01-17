@@ -310,9 +310,13 @@ ob_start();
     
     .sf9-header {
         text-align: center;
-        margin-bottom: 20px;
+        margin-bottom: 5px;
         border-bottom: 2px solid #000;
         padding-bottom: 10px;
+    }
+    
+    .student-info-grid {
+        margin-top: -5px;
     }
     
     .sf9-title {
@@ -446,15 +450,11 @@ ob_start();
 
 <form id="sf9Form" method="POST">
 <div class="sf9-container">
-    <!-- Header Image -->
-    <div class="sf9-header" style="text-align: center; margin-bottom: 20px; border: none; padding: 0;">
-        <img src="img/sf9.png" alt="SF9 Header" style="width: 100%; max-width: 100%; height: auto; display: block;">
-    </div>
-
-    <!-- Student Information -->
-    <div class="student-info-grid">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-            <!-- Basic Student Info -->
+    <!-- Two-Column Layout: Student Info (Left) | Header (Right) -->
+    <div style="display: grid; grid-template-columns: 35% 65%; gap: 20px; margin-bottom: 20px; align-items: start;">
+        
+        <!-- Left Column: Student Information -->
+        <div>
             <div>
                 <table style="width: 100%; font-size: 12px;">
                     <tr>
@@ -485,13 +485,7 @@ ob_start();
                             <?php echo htmlspecialchars($student['school_year']); ?>
                         </td>
                     </tr>
-                </table>
-            </div>
-            
-            <!-- Additional Info -->
-            <div>
-                <table style="width: 100%; font-size: 12px;">
-                    <tr>
+                      <tr>
                         <td style="width: 80px;"><strong>Section:</strong></td>
                         <td style="border-bottom: 1px solid #000; padding: 5px;">
                             <?php echo htmlspecialchars($student['section']); ?>
@@ -525,6 +519,15 @@ ob_start();
                                    class="editable-field">
                         </td>
                     </tr>
+                </table>
+                <br>
+                <br>
+            </div>
+            
+            <!-- Additional Info -->
+            <div>
+                <table style="width: 100%; font-size: 12px;">
+                  
                 </table>
             </div>
         </div>

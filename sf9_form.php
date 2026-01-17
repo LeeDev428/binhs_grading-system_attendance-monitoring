@@ -36,11 +36,13 @@ try {
                COALESCE(sg.final_grade, '') as final_grade,
                COALESCE(sg.status, '') as remarks
         FROM subjects s
-        LEFT JOIN student_grades sg ON s.id = sg.subject_id AND sg.student_id = ?
+        LEFT JOIN student_grades sg ON s.id = sg.subject_id 
+            AND sg.student_id = ? 
+            AND sg.school_year = ?
         WHERE s.grade_level = ? AND s.is_first_sem = 1
         ORDER BY s.subject_type, s.subject_name
     ");
-    $stmt->execute([$student_id, $student['grade_level']]);
+    $stmt->execute([$student_id, $student['school_year'], $student['grade_level']]);
     $first_sem_subjects = $stmt->fetchAll();
     
     // Get second semester subjects (filtered by grade level and semester)
@@ -53,11 +55,13 @@ try {
                COALESCE(sg.final_grade, '') as final_grade,
                COALESCE(sg.status, '') as remarks
         FROM subjects s
-        LEFT JOIN student_grades sg ON s.id = sg.subject_id AND sg.student_id = ?
+        LEFT JOIN student_grades sg ON s.id = sg.subject_id 
+            AND sg.student_id = ? 
+            AND sg.school_year = ?
         WHERE s.grade_level = ? AND s.is_second_sem = 1
         ORDER BY s.subject_type, s.subject_name
     ");
-    $stmt->execute([$student_id, $student['grade_level']]);
+    $stmt->execute([$student_id, $student['school_year'], $student['grade_level']]);
     $second_sem_subjects = $stmt->fetchAll();
     
     // Organize first semester subjects by type
@@ -286,47 +290,82 @@ if ($_POST && isset($_POST['save_sf9'])) {
         // Save grades to student_grades table
         if (isset($_POST['grades']) && is_array($_POST['grades'])) {
             foreach ($_POST['grades'] as $subject_id => $grade_data) {
-                // Validate and sanitize grade data - use 0.00 for empty values to match database DEFAULT
-                $quarter_1 = (isset($grade_data['q1']) && $grade_data['q1'] !== '' && is_numeric($grade_data['q1'])) ? (float)$grade_data['q1'] : 0.00;
-                $quarter_2 = (isset($grade_data['q2']) && $grade_data['q2'] !== '' && is_numeric($grade_data['q2'])) ? (float)$grade_data['q2'] : 0.00;
-                $quarter_3 = (isset($grade_data['q3']) && $grade_data['q3'] !== '' && is_numeric($grade_data['q3'])) ? (float)$grade_data['q3'] : 0.00;
-                $quarter_4 = (isset($grade_data['q4']) && $grade_data['q4'] !== '' && is_numeric($grade_data['q4'])) ? (float)$grade_data['q4'] : 0.00;
-                $final_grade = (isset($grade_data['final']) && $grade_data['final'] !== '' && is_numeric($grade_data['final'])) ? (float)$grade_data['final'] : 0.00;
-                $remarks = (isset($grade_data['remarks']) && trim($grade_data['remarks']) !== '') ? trim($grade_data['remarks']) : '';
-                
-                // Determine status based on final grade - only mark FAILED if grade is entered and below 75
-                $status = 'PASSED';
-                if ($final_grade > 0 && $final_grade < 75) {
-                    $status = 'FAILED';
+                // Skip if subject_id is not numeric or empty
+                if (!is_numeric($subject_id) || empty($subject_id)) {
+                    continue;
                 }
                 
-                // Insert or update grade record
-                $stmt = $pdo->prepare("
-                    INSERT INTO student_grades (student_id, subject_id, quarter_1, quarter_2, quarter_3, quarter_4, final_grade, status, remarks, school_year, created_by)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    ON DUPLICATE KEY UPDATE
-                    quarter_1 = VALUES(quarter_1),
-                    quarter_2 = VALUES(quarter_2),
-                    quarter_3 = VALUES(quarter_3),
-                    quarter_4 = VALUES(quarter_4),
-                    final_grade = VALUES(final_grade),
-                    status = VALUES(status),
-                    remarks = VALUES(remarks),
-                    updated_at = NOW()
-                ");
-                $stmt->execute([
-                    $student_id,
-                    $subject_id,
-                    $quarter_1,
-                    $quarter_2,
-                    $quarter_3,
-                    $quarter_4,
-                    $final_grade,
-                    $status,
-                    $remarks,
-                    $student['school_year'],
-                    $_SESSION['user_id'] ?? null
-                ]);
+                // Skip if no data provided for this subject
+                if (empty($grade_data['q1']) && empty($grade_data['q2']) && 
+                    empty($grade_data['q3']) && empty($grade_data['q4']) && 
+                    empty($grade_data['final'])) {
+                    continue;
+                }
+                
+                try {
+                    // Validate and sanitize grade data - convert to proper float or NULL
+                    $quarter_1 = null;
+                    $quarter_2 = null;
+                    $quarter_3 = null;
+                    $quarter_4 = null;
+                    $final_grade = null;
+                    
+                    if (isset($grade_data['q1']) && $grade_data['q1'] !== '' && is_numeric($grade_data['q1'])) {
+                        $quarter_1 = round((float)$grade_data['q1'], 2);
+                    }
+                    if (isset($grade_data['q2']) && $grade_data['q2'] !== '' && is_numeric($grade_data['q2'])) {
+                        $quarter_2 = round((float)$grade_data['q2'], 2);
+                    }
+                    if (isset($grade_data['q3']) && $grade_data['q3'] !== '' && is_numeric($grade_data['q3'])) {
+                        $quarter_3 = round((float)$grade_data['q3'], 2);
+                    }
+                    if (isset($grade_data['q4']) && $grade_data['q4'] !== '' && is_numeric($grade_data['q4'])) {
+                        $quarter_4 = round((float)$grade_data['q4'], 2);
+                    }
+                    if (isset($grade_data['final']) && $grade_data['final'] !== '' && is_numeric($grade_data['final'])) {
+                        $final_grade = round((float)$grade_data['final'], 2);
+                    }
+                    
+                    $remarks = (isset($grade_data['remarks']) && trim($grade_data['remarks']) !== '') ? trim($grade_data['remarks']) : null;
+                    
+                    // Determine status based on final grade
+                    $status = null;
+                    if ($final_grade !== null) {
+                        $status = ($final_grade < 75) ? 'FAILED' : 'PASSED';
+                    }
+                    
+                    // Insert or update grade record
+                    $stmt = $pdo->prepare("
+                        INSERT INTO student_grades (student_id, subject_id, quarter_1, quarter_2, quarter_3, quarter_4, final_grade, status, remarks, school_year, created_by)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ON DUPLICATE KEY UPDATE
+                        quarter_1 = VALUES(quarter_1),
+                        quarter_2 = VALUES(quarter_2),
+                        quarter_3 = VALUES(quarter_3),
+                        quarter_4 = VALUES(quarter_4),
+                        final_grade = VALUES(final_grade),
+                        status = VALUES(status),
+                        remarks = VALUES(remarks),
+                        updated_at = NOW()
+                    ");
+                    $stmt->execute([
+                        $student_id,
+                        $subject_id,
+                        $quarter_1,
+                        $quarter_2,
+                        $quarter_3,
+                        $quarter_4,
+                        $final_grade,
+                        $status,
+                        $remarks,
+                        $student['school_year'],
+                        $_SESSION['user_id'] ?? null
+                    ]);
+                } catch (PDOException $e) {
+                    // Log specific error for this subject
+                    error_log("Grade save error for subject $subject_id: " . $e->getMessage());
+                    throw $e; // Re-throw to be caught by outer try-catch
+                }
             }
         }
         

@@ -286,17 +286,17 @@ if ($_POST && isset($_POST['save_sf9'])) {
         // Save grades to student_grades table
         if (isset($_POST['grades']) && is_array($_POST['grades'])) {
             foreach ($_POST['grades'] as $subject_id => $grade_data) {
-                // Validate and sanitize grade data - ensure empty strings become NULL
-                $quarter_1 = (isset($grade_data['q1']) && $grade_data['q1'] !== '' && is_numeric($grade_data['q1'])) ? (float)$grade_data['q1'] : null;
-                $quarter_2 = (isset($grade_data['q2']) && $grade_data['q2'] !== '' && is_numeric($grade_data['q2'])) ? (float)$grade_data['q2'] : null;
-                $quarter_3 = (isset($grade_data['q3']) && $grade_data['q3'] !== '' && is_numeric($grade_data['q3'])) ? (float)$grade_data['q3'] : null;
-                $quarter_4 = (isset($grade_data['q4']) && $grade_data['q4'] !== '' && is_numeric($grade_data['q4'])) ? (float)$grade_data['q4'] : null;
-                $final_grade = (isset($grade_data['final']) && $grade_data['final'] !== '' && is_numeric($grade_data['final'])) ? (float)$grade_data['final'] : null;
+                // Validate and sanitize grade data - use 0.00 for empty values to match database DEFAULT
+                $quarter_1 = (isset($grade_data['q1']) && $grade_data['q1'] !== '' && is_numeric($grade_data['q1'])) ? (float)$grade_data['q1'] : 0.00;
+                $quarter_2 = (isset($grade_data['q2']) && $grade_data['q2'] !== '' && is_numeric($grade_data['q2'])) ? (float)$grade_data['q2'] : 0.00;
+                $quarter_3 = (isset($grade_data['q3']) && $grade_data['q3'] !== '' && is_numeric($grade_data['q3'])) ? (float)$grade_data['q3'] : 0.00;
+                $quarter_4 = (isset($grade_data['q4']) && $grade_data['q4'] !== '' && is_numeric($grade_data['q4'])) ? (float)$grade_data['q4'] : 0.00;
+                $final_grade = (isset($grade_data['final']) && $grade_data['final'] !== '' && is_numeric($grade_data['final'])) ? (float)$grade_data['final'] : 0.00;
                 $remarks = (isset($grade_data['remarks']) && trim($grade_data['remarks']) !== '') ? trim($grade_data['remarks']) : '';
                 
-                // Determine status based on final grade
+                // Determine status based on final grade - only mark FAILED if grade is entered and below 75
                 $status = 'PASSED';
-                if ($final_grade !== null && $final_grade < 75) {
+                if ($final_grade > 0 && $final_grade < 75) {
                     $status = 'FAILED';
                 }
                 
@@ -598,8 +598,8 @@ ob_start();
         <!-- RIGHT COLUMN: Header + Student Information -->
         <div>
             <!-- Header with Logos -->
-            <div style="text-align: center; margin-bottom: 15px;">
-                <img src="img/sf9.png" alt="SF9 Header" style="width: 95%; max-width: 95%; height: auto;">
+            <div style="text-align: center; margin-bottom: 10px;">
+                <img src="img/sf9.png" alt="SF9 Header" style="width: 60%; max-width: 60%; height: auto;">
             </div>
             
             <!-- Student Information Fields -->
@@ -681,14 +681,14 @@ ob_start();
                 <!-- Class Adviser Signature -->
                 <div style="text-align: right; margin-top: 30px; font-size: 11px;">
                     <div style="border-bottom: 1px solid #000; display: inline-block; min-width: 250px; text-align: center; padding: 5px 0;">
-                        ARNOLD M. ARANAYDO
+                        Class Adviser:  &nbsp; ARNOLD M. ARANAYDO
                     </div>
-                    <div style="text-align: center;"><em>Class Adviser</em></div>
+                    <!-- <div style="text-align: center;"><em>Class Adviser</em></div> -->
                     
-                    <div style="margin-top: 20px; border-bottom: 1px solid #000; display: inline-block; min-width: 250px; text-align: center; padding: 5px 0;">
+                    <!-- <div style="margin-top: 20px; border-bottom: 1px solid #000; display: inline-block; min-width: 250px; text-align: center; padding: 5px 0;">
                         OLIVER P. CALIWAG
                     </div>
-                    <div style="text-align: center;"><em>Principal III</em></div>
+                    <div style="text-align: center;"><em>Principal III</em></div> -->
                 </div>
             </div>
         </div>

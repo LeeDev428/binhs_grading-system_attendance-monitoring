@@ -206,6 +206,35 @@ try {
         }
     }
     
+    // Fetch saved attendance data from sf9_attendance table
+    $saved_attendance = [];
+    if ($sf9_data) {
+        $stmt = $pdo->prepare("SELECT month, school_days, days_present, days_absent FROM sf9_attendance WHERE sf9_form_id = ? AND student_id = ?");
+        $stmt->execute([$sf9_data['id'], $student_id]);
+        while ($row = $stmt->fetch()) {
+            $saved_attendance[$row['month']] = [
+                'school_days' => $row['school_days'],
+                'present' => $row['days_present'],
+                'absent' => $row['days_absent']
+            ];
+        }
+    }
+    
+    // Get saved core values
+    $saved_core_values = [];
+    if ($sf9_data) {
+        $stmt = $pdo->prepare("SELECT core_value, quarter_1, quarter_2, quarter_3, quarter_4 FROM sf9_core_values WHERE sf9_form_id = ?");
+        $stmt->execute([$sf9_data['id']]);
+        while ($row = $stmt->fetch()) {
+            $saved_core_values[$row['core_value']] = [
+                'q1' => $row['quarter_1'],
+                'q2' => $row['quarter_2'],
+                'q3' => $row['quarter_3'],
+                'q4' => $row['quarter_4']
+            ];
+        }
+    }
+    
 } catch (PDOException $e) {
     $error = 'Could not load student data: ' . $e->getMessage();
 }
@@ -234,7 +263,7 @@ if ($_POST && isset($_POST['save_sf9'])) {
         ]);
         
         // Save attendance data
-        $months = ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
+        $months = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
         foreach ($months as $month) {
             if (isset($_POST['attendance'][$month])) {
                 $attendance = $_POST['attendance'][$month];
@@ -245,8 +274,8 @@ if ($_POST && isset($_POST['save_sf9'])) {
                 $absent = (!empty($attendance['absent']) && is_numeric($attendance['absent'])) ? (int)$attendance['absent'] : 0;
                 
                 $stmt = $pdo->prepare("
-                    INSERT INTO sf9_attendance (sf9_form_id, month, school_days, days_present, days_absent)
-                    VALUES (?, ?, ?, ?, ?)
+                    INSERT INTO sf9_attendance (sf9_form_id, student_id, month, school_days, days_present, days_absent)
+                    VALUES (?, ?, ?, ?, ?, ?)
                     ON DUPLICATE KEY UPDATE
                     school_days = VALUES(school_days),
                     days_present = VALUES(days_present),
@@ -254,6 +283,7 @@ if ($_POST && isset($_POST['save_sf9'])) {
                 ");
                 $stmt->execute([
                     $sf9_data['id'],
+                    $student_id,
                     $month,
                     $school_days,
                     $present,
@@ -311,19 +341,19 @@ if ($_POST && isset($_POST['save_sf9'])) {
                     $final_grade = null;
                     
                     if (isset($grade_data['q1']) && $grade_data['q1'] !== '' && is_numeric($grade_data['q1'])) {
-                        $quarter_1 = round((float)$grade_data['q1'], 2);
+                        $quarter_1 = intval($grade_data['q1']);
                     }
                     if (isset($grade_data['q2']) && $grade_data['q2'] !== '' && is_numeric($grade_data['q2'])) {
-                        $quarter_2 = round((float)$grade_data['q2'], 2);
+                        $quarter_2 = intval($grade_data['q2']);
                     }
                     if (isset($grade_data['q3']) && $grade_data['q3'] !== '' && is_numeric($grade_data['q3'])) {
-                        $quarter_3 = round((float)$grade_data['q3'], 2);
+                        $quarter_3 = intval($grade_data['q3']);
                     }
                     if (isset($grade_data['q4']) && $grade_data['q4'] !== '' && is_numeric($grade_data['q4'])) {
-                        $quarter_4 = round((float)$grade_data['q4'], 2);
+                        $quarter_4 = intval($grade_data['q4']);
                     }
                     if (isset($grade_data['final']) && $grade_data['final'] !== '' && is_numeric($grade_data['final'])) {
-                        $final_grade = round((float)$grade_data['final'], 2);
+                        $final_grade = intval($grade_data['final']);
                     }
                     
                     $remarks = (isset($grade_data['remarks']) && trim($grade_data['remarks']) !== '') ? trim($grade_data['remarks']) : null;
@@ -569,23 +599,63 @@ ob_start();
                         </tr>
                     </thead>
                     <tbody>
+                        <?php 
+                        $months_short = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
+                        $totals = ['school_days' => 0, 'present' => 0, 'absent' => 0];
+                        ?>
                         <tr>
                             <td style="border: 1px solid #000; padding: 3px; font-weight: bold;">No. of school days</td>
-                            <?php for ($i = 0; $i < 13; $i++): ?>
-                            <td style="border: 1px solid #000; padding: 3px; text-align: center;"></td>
-                            <?php endfor; ?>
+                            <?php 
+                            foreach ($months_short as $month): 
+                                $value = isset($saved_attendance[$month]) ? $saved_attendance[$month]['school_days'] : '';
+                                $totals['school_days'] += (int)$value;
+                            ?>
+                            <td style="border: 1px solid #000; padding: 3px; text-align: center;">
+                                <input type="number" name="attendance[<?php echo $month; ?>][school_days]" 
+                                       value="<?php echo $value; ?>" 
+                                       style="width: 100%; text-align: center; border: none; padding: 2px; -moz-appearance: textfield;" 
+                                       min="0" max="31">
+                            </td>
+                            <?php endforeach; ?>
+                            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">
+                                <?php echo $totals['school_days']; ?>
+                            </td>
                         </tr>
                         <tr>
                             <td style="border: 1px solid #000; padding: 3px; font-weight: bold;">No. of days present</td>
-                            <?php for ($i = 0; $i < 13; $i++): ?>
-                            <td style="border: 1px solid #000; padding: 3px; text-align: center;"></td>
-                            <?php endfor; ?>
+                            <?php 
+                            foreach ($months_short as $month): 
+                                $value = isset($saved_attendance[$month]) ? $saved_attendance[$month]['present'] : '';
+                                $totals['present'] += (int)$value;
+                            ?>
+                            <td style="border: 1px solid #000; padding: 3px; text-align: center;">
+                                <input type="number" name="attendance[<?php echo $month; ?>][present]" 
+                                       value="<?php echo $value; ?>" 
+                                       style="width: 100%; text-align: center; border: none; padding: 2px;" 
+                                       min="0" max="31">
+                            </td>
+                            <?php endforeach; ?>
+                            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">
+                                <?php echo $totals['present']; ?>
+                            </td>
                         </tr>
                         <tr>
                             <td style="border: 1px solid #000; padding: 3px; font-weight: bold;">No. of days absent</td>
-                            <?php for ($i = 0; $i < 13; $i++): ?>
-                            <td style="border: 1px solid #000; padding: 3px; text-align: center;"></td>
-                            <?php endfor; ?>
+                            <?php 
+                            foreach ($months_short as $month): 
+                                $value = isset($saved_attendance[$month]) ? $saved_attendance[$month]['absent'] : '';
+                                $totals['absent'] += (int)$value;
+                            ?>
+                            <td style="border: 1px solid #000; padding: 3px; text-align: center;">
+                                <input type="number" name="attendance[<?php echo $month; ?>][absent]" 
+                                       value="<?php echo $value; ?>" 
+                                       style="width: 100%; text-align: center; border: none; padding: 2px;" 
+                                       min="0" max="31">
+                            </td>
+                            <?php endforeach; ?>
+                            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">
+                                <?php echo $totals['absent']; ?>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -964,10 +1034,10 @@ ob_start();
                         <td rowspan="2">
                             <select name="core_values[Maka-Diyos][q1]" class="editable-field">
                                 <option value="">-</option>
-                                <option value="AO">AO</option>
-                                <option value="SO">SO</option>
-                                <option value="RO">RO</option>
-                                <option value="NO">NO</option>
+                                <option value="AO" <?php echo (isset($saved_core_values['Maka-Diyos']) && $saved_core_values['Maka-Diyos']['q1'] == 'AO') ? 'selected' : ''; ?>>AO</option>
+                                <option value="SO" <?php echo (isset($saved_core_values['Maka-Diyos']) && $saved_core_values['Maka-Diyos']['q1'] == 'SO') ? 'selected' : ''; ?>>SO</option>
+                                <option value="RO" <?php echo (isset($saved_core_values['Maka-Diyos']) && $saved_core_values['Maka-Diyos']['q1'] == 'RO') ? 'selected' : ''; ?>>RO</option>
+                                <option value="NO" <?php echo (isset($saved_core_values['Maka-Diyos']) && $saved_core_values['Maka-Diyos']['q1'] == 'NO') ? 'selected' : ''; ?>>NO</option>
                             </select>
                         </td>
                         <td rowspan="2">

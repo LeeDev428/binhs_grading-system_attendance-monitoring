@@ -1025,6 +1025,15 @@ ob_start();
             
             <div style="border: 2px solid #000; padding: 8px;">
             
+            <!-- Legend for Core Values -->
+            <div style="background-color: #f9f9f9; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; font-size: 9px;">
+                <strong>Marking:</strong>
+                <span style="margin-left: 15px;"><strong>AO</strong> - Always Observed</span>
+                <span style="margin-left: 15px;"><strong>SO</strong> - Sometimes Observed</span>
+                <span style="margin-left: 15px;"><strong>RO</strong> - Rarely Observed</span>
+                <span style="margin-left: 15px;"><strong>NO</strong> - Not Observed</span>
+            </div>
+            
             <table style="width: 100%; border-collapse: collapse; font-size: 9px;">
                 <thead>
                     <tr style="background-color: #e0e0e0;">
@@ -1055,28 +1064,28 @@ ob_start();
                         <td rowspan="2">
                             <select name="core_values[Maka-Diyos][q2]" class="editable-field">
                                 <option value="">-</option>
-                                <option value="AO">AO</option>
-                                <option value="SO">SO</option>
-                                <option value="RO">RO</option>
-                                <option value="NO">NO</option>
+                                <option value="AO" <?php echo (isset($saved_core_values['Maka-Diyos']) && $saved_core_values['Maka-Diyos']['q2'] == 'AO') ? 'selected' : ''; ?>>AO</option>
+                                <option value="SO" <?php echo (isset($saved_core_values['Maka-Diyos']) && $saved_core_values['Maka-Diyos']['q2'] == 'SO') ? 'selected' : ''; ?>>SO</option>
+                                <option value="RO" <?php echo (isset($saved_core_values['Maka-Diyos']) && $saved_core_values['Maka-Diyos']['q2'] == 'RO') ? 'selected' : ''; ?>>RO</option>
+                                <option value="NO" <?php echo (isset($saved_core_values['Maka-Diyos']) && $saved_core_values['Maka-Diyos']['q2'] == 'NO') ? 'selected' : ''; ?>>NO</option>
                             </select>
                         </td>
                         <td rowspan="2">
                             <select name="core_values[Maka-Diyos][q3]" class="editable-field">
                                 <option value="">-</option>
-                                <option value="AO">AO</option>
-                                <option value="SO">SO</option>
-                                <option value="RO">RO</option>
-                                <option value="NO">NO</option>
+                                <option value="AO" <?php echo (isset($saved_core_values['Maka-Diyos']) && $saved_core_values['Maka-Diyos']['q3'] == 'AO') ? 'selected' : ''; ?>>AO</option>
+                                <option value="SO" <?php echo (isset($saved_core_values['Maka-Diyos']) && $saved_core_values['Maka-Diyos']['q3'] == 'SO') ? 'selected' : ''; ?>>SO</option>
+                                <option value="RO" <?php echo (isset($saved_core_values['Maka-Diyos']) && $saved_core_values['Maka-Diyos']['q3'] == 'RO') ? 'selected' : ''; ?>>RO</option>
+                                <option value="NO" <?php echo (isset($saved_core_values['Maka-Diyos']) && $saved_core_values['Maka-Diyos']['q3'] == 'NO') ? 'selected' : ''; ?>>NO</option>
                             </select>
                         </td>
                         <td rowspan="2">
                             <select name="core_values[Maka-Diyos][q4]" class="editable-field">
                                 <option value="">-</option>
-                                <option value="AO">AO</option>
-                                <option value="SO">SO</option>
-                                <option value="RO">RO</option>
-                                <option value="NO">NO</option>
+                                <option value="AO" <?php echo (isset($saved_core_values['Maka-Diyos']) && $saved_core_values['Maka-Diyos']['q4'] == 'AO') ? 'selected' : ''; ?>>AO</option>
+                                <option value="SO" <?php echo (isset($saved_core_values['Maka-Diyos']) && $saved_core_values['Maka-Diyos']['q4'] == 'SO') ? 'selected' : ''; ?>>SO</option>
+                                <option value="RO" <?php echo (isset($saved_core_values['Maka-Diyos']) && $saved_core_values['Maka-Diyos']['q4'] == 'RO') ? 'selected' : ''; ?>>RO</option>
+                                <option value="NO" <?php echo (isset($saved_core_values['Maka-Diyos']) && $saved_core_values['Maka-Diyos']['q4'] == 'NO') ? 'selected' : ''; ?>>NO</option>
                             </select>
                         </td>
                     </tr>
@@ -1090,37 +1099,37 @@ ob_start();
                         <td rowspan="2">
                             <select name="core_values[Makatao][q1]" class="editable-field">
                                 <option value="">-</option>
-                                <option value="AO">AO</option>
-                                <option value="SO">SO</option>
-                                <option value="RO">RO</option>
-                                <option value="NO">NO</option>
+                                <option value="AO" <?php echo (isset($saved_core_values['Makatao']) && $saved_core_values['Makatao']['q1'] == 'AO') ? 'selected' : ''; ?>>AO</option>
+                                <option value="SO" <?php echo (isset($saved_core_values['Makatao']) && $saved_core_values['Makatao']['q1'] == 'SO') ? 'selected' : ''; ?>>SO</option>
+                                <option value="RO" <?php echo (isset($saved_core_values['Makatao']) && $saved_core_values['Makatao']['q1'] == 'RO') ? 'selected' : ''; ?>>RO</option>
+                                <option value="NO" <?php echo (isset($saved_core_values['Makatao']) && $saved_core_values['Makatao']['q1'] == 'NO') ? 'selected' : ''; ?>>NO</option>
                             </select>
                         </td>
                         <td rowspan="2">
                             <select name="core_values[Makatao][q2]" class="editable-field">
                                 <option value="">-</option>
-                                <option value="AO">AO</option>
-                                <option value="SO">SO</option>
-                                <option value="RO">RO</option>
-                                <option value="NO">NO</option>
+                                <option value="AO" <?php echo (isset($saved_core_values['Makatao']) && $saved_core_values['Makatao']['q2'] == 'AO') ? 'selected' : ''; ?>>AO</option>
+                                <option value="SO" <?php echo (isset($saved_core_values['Makatao']) && $saved_core_values['Makatao']['q2'] == 'SO') ? 'selected' : ''; ?>>SO</option>
+                                <option value="RO" <?php echo (isset($saved_core_values['Makatao']) && $saved_core_values['Makatao']['q2'] == 'RO') ? 'selected' : ''; ?>>RO</option>
+                                <option value="NO" <?php echo (isset($saved_core_values['Makatao']) && $saved_core_values['Makatao']['q2'] == 'NO') ? 'selected' : ''; ?>>NO</option>
                             </select>
                         </td>
                         <td rowspan="2">
                             <select name="core_values[Makatao][q3]" class="editable-field">
                                 <option value="">-</option>
-                                <option value="AO">AO</option>
-                                <option value="SO">SO</option>
-                                <option value="RO">RO</option>
-                                <option value="NO">NO</option>
+                                <option value="AO" <?php echo (isset($saved_core_values['Makatao']) && $saved_core_values['Makatao']['q3'] == 'AO') ? 'selected' : ''; ?>>AO</option>
+                                <option value="SO" <?php echo (isset($saved_core_values['Makatao']) && $saved_core_values['Makatao']['q3'] == 'SO') ? 'selected' : ''; ?>>SO</option>
+                                <option value="RO" <?php echo (isset($saved_core_values['Makatao']) && $saved_core_values['Makatao']['q3'] == 'RO') ? 'selected' : ''; ?>>RO</option>
+                                <option value="NO" <?php echo (isset($saved_core_values['Makatao']) && $saved_core_values['Makatao']['q3'] == 'NO') ? 'selected' : ''; ?>>NO</option>
                             </select>
                         </td>
                         <td rowspan="2">
                             <select name="core_values[Makatao][q4]" class="editable-field">
                                 <option value="">-</option>
-                                <option value="AO">AO</option>
-                                <option value="SO">SO</option>
-                                <option value="RO">RO</option>
-                                <option value="NO">NO</option>
+                                <option value="AO" <?php echo (isset($saved_core_values['Makatao']) && $saved_core_values['Makatao']['q4'] == 'AO') ? 'selected' : ''; ?>>AO</option>
+                                <option value="SO" <?php echo (isset($saved_core_values['Makatao']) && $saved_core_values['Makatao']['q4'] == 'SO') ? 'selected' : ''; ?>>SO</option>
+                                <option value="RO" <?php echo (isset($saved_core_values['Makatao']) && $saved_core_values['Makatao']['q4'] == 'RO') ? 'selected' : ''; ?>>RO</option>
+                                <option value="NO" <?php echo (isset($saved_core_values['Makatao']) && $saved_core_values['Makatao']['q4'] == 'NO') ? 'selected' : ''; ?>>NO</option>
                             </select>
                         </td>
                     </tr>
@@ -1134,37 +1143,37 @@ ob_start();
                         <td rowspan="2">
                             <select name="core_values[Makakalikasan][q1]" class="editable-field">
                                 <option value="">-</option>
-                                <option value="AO">AO</option>
-                                <option value="SO">SO</option>
-                                <option value="RO">RO</option>
-                                <option value="NO">NO</option>
+                                <option value="AO" <?php echo (isset($saved_core_values['Makakalikasan']) && $saved_core_values['Makakalikasan']['q1'] == 'AO') ? 'selected' : ''; ?>>AO</option>
+                                <option value="SO" <?php echo (isset($saved_core_values['Makakalikasan']) && $saved_core_values['Makakalikasan']['q1'] == 'SO') ? 'selected' : ''; ?>>SO</option>
+                                <option value="RO" <?php echo (isset($saved_core_values['Makakalikasan']) && $saved_core_values['Makakalikasan']['q1'] == 'RO') ? 'selected' : ''; ?>>RO</option>
+                                <option value="NO" <?php echo (isset($saved_core_values['Makakalikasan']) && $saved_core_values['Makakalikasan']['q1'] == 'NO') ? 'selected' : ''; ?>>NO</option>
                             </select>
                         </td>
                         <td rowspan="2">
                             <select name="core_values[Makakalikasan][q2]" class="editable-field">
                                 <option value="">-</option>
-                                <option value="AO">AO</option>
-                                <option value="SO">SO</option>
-                                <option value="RO">RO</option>
-                                <option value="NO">NO</option>
+                                <option value="AO" <?php echo (isset($saved_core_values['Makakalikasan']) && $saved_core_values['Makakalikasan']['q2'] == 'AO') ? 'selected' : ''; ?>>AO</option>
+                                <option value="SO" <?php echo (isset($saved_core_values['Makakalikasan']) && $saved_core_values['Makakalikasan']['q2'] == 'SO') ? 'selected' : ''; ?>>SO</option>
+                                <option value="RO" <?php echo (isset($saved_core_values['Makakalikasan']) && $saved_core_values['Makakalikasan']['q2'] == 'RO') ? 'selected' : ''; ?>>RO</option>
+                                <option value="NO" <?php echo (isset($saved_core_values['Makakalikasan']) && $saved_core_values['Makakalikasan']['q2'] == 'NO') ? 'selected' : ''; ?>>NO</option>
                             </select>
                         </td>
                         <td rowspan="2">
                             <select name="core_values[Makakalikasan][q3]" class="editable-field">
                                 <option value="">-</option>
-                                <option value="AO">AO</option>
-                                <option value="SO">SO</option>
-                                <option value="RO">RO</option>
-                                <option value="NO">NO</option>
+                                <option value="AO" <?php echo (isset($saved_core_values['Makakalikasan']) && $saved_core_values['Makakalikasan']['q3'] == 'AO') ? 'selected' : ''; ?>>AO</option>
+                                <option value="SO" <?php echo (isset($saved_core_values['Makakalikasan']) && $saved_core_values['Makakalikasan']['q3'] == 'SO') ? 'selected' : ''; ?>>SO</option>
+                                <option value="RO" <?php echo (isset($saved_core_values['Makakalikasan']) && $saved_core_values['Makakalikasan']['q3'] == 'RO') ? 'selected' : ''; ?>>RO</option>
+                                <option value="NO" <?php echo (isset($saved_core_values['Makakalikasan']) && $saved_core_values['Makakalikasan']['q3'] == 'NO') ? 'selected' : ''; ?>>NO</option>
                             </select>
                         </td>
                         <td rowspan="2">
                             <select name="core_values[Makakalikasan][q4]" class="editable-field">
                                 <option value="">-</option>
-                                <option value="AO">AO</option>
-                                <option value="SO">SO</option>
-                                <option value="RO">RO</option>
-                                <option value="NO">NO</option>
+                                <option value="AO" <?php echo (isset($saved_core_values['Makakalikasan']) && $saved_core_values['Makakalikasan']['q4'] == 'AO') ? 'selected' : ''; ?>>AO</option>
+                                <option value="SO" <?php echo (isset($saved_core_values['Makakalikasan']) && $saved_core_values['Makakalikasan']['q4'] == 'SO') ? 'selected' : ''; ?>>SO</option>
+                                <option value="RO" <?php echo (isset($saved_core_values['Makakalikasan']) && $saved_core_values['Makakalikasan']['q4'] == 'RO') ? 'selected' : ''; ?>>RO</option>
+                                <option value="NO" <?php echo (isset($saved_core_values['Makakalikasan']) && $saved_core_values['Makakalikasan']['q4'] == 'NO') ? 'selected' : ''; ?>>NO</option>
                             </select>
                         </td>
                     </tr>
@@ -1178,37 +1187,37 @@ ob_start();
                         <td rowspan="2">
                             <select name="core_values[Makabansa][q1]" class="editable-field">
                                 <option value="">-</option>
-                                <option value="AO">AO</option>
-                                <option value="SO">SO</option>
-                                <option value="RO">RO</option>
-                                <option value="NO">NO</option>
+                                <option value="AO" <?php echo (isset($saved_core_values['Makabansa']) && $saved_core_values['Makabansa']['q1'] == 'AO') ? 'selected' : ''; ?>>AO</option>
+                                <option value="SO" <?php echo (isset($saved_core_values['Makabansa']) && $saved_core_values['Makabansa']['q1'] == 'SO') ? 'selected' : ''; ?>>SO</option>
+                                <option value="RO" <?php echo (isset($saved_core_values['Makabansa']) && $saved_core_values['Makabansa']['q1'] == 'RO') ? 'selected' : ''; ?>>RO</option>
+                                <option value="NO" <?php echo (isset($saved_core_values['Makabansa']) && $saved_core_values['Makabansa']['q1'] == 'NO') ? 'selected' : ''; ?>>NO</option>
                             </select>
                         </td>
                         <td rowspan="2">
                             <select name="core_values[Makabansa][q2]" class="editable-field">
                                 <option value="">-</option>
-                                <option value="AO">AO</option>
-                                <option value="SO">SO</option>
-                                <option value="RO">RO</option>
-                                <option value="NO">NO</option>
+                                <option value="AO" <?php echo (isset($saved_core_values['Makabansa']) && $saved_core_values['Makabansa']['q2'] == 'AO') ? 'selected' : ''; ?>>AO</option>
+                                <option value="SO" <?php echo (isset($saved_core_values['Makabansa']) && $saved_core_values['Makabansa']['q2'] == 'SO') ? 'selected' : ''; ?>>SO</option>
+                                <option value="RO" <?php echo (isset($saved_core_values['Makabansa']) && $saved_core_values['Makabansa']['q2'] == 'RO') ? 'selected' : ''; ?>>RO</option>
+                                <option value="NO" <?php echo (isset($saved_core_values['Makabansa']) && $saved_core_values['Makabansa']['q2'] == 'NO') ? 'selected' : ''; ?>>NO</option>
                             </select>
                         </td>
                         <td rowspan="2">
                             <select name="core_values[Makabansa][q3]" class="editable-field">
                                 <option value="">-</option>
-                                <option value="AO">AO</option>
-                                <option value="SO">SO</option>
-                                <option value="RO">RO</option>
-                                <option value="NO">NO</option>
+                                <option value="AO" <?php echo (isset($saved_core_values['Makabansa']) && $saved_core_values['Makabansa']['q3'] == 'AO') ? 'selected' : ''; ?>>AO</option>
+                                <option value="SO" <?php echo (isset($saved_core_values['Makabansa']) && $saved_core_values['Makabansa']['q3'] == 'SO') ? 'selected' : ''; ?>>SO</option>
+                                <option value="RO" <?php echo (isset($saved_core_values['Makabansa']) && $saved_core_values['Makabansa']['q3'] == 'RO') ? 'selected' : ''; ?>>RO</option>
+                                <option value="NO" <?php echo (isset($saved_core_values['Makabansa']) && $saved_core_values['Makabansa']['q3'] == 'NO') ? 'selected' : ''; ?>>NO</option>
                             </select>
                         </td>
                         <td rowspan="2">
                             <select name="core_values[Makabansa][q4]" class="editable-field">
                                 <option value="">-</option>
-                                <option value="AO">AO</option>
-                                <option value="SO">SO</option>
-                                <option value="RO">RO</option>
-                                <option value="NO">NO</option>
+                                <option value="AO" <?php echo (isset($saved_core_values['Makabansa']) && $saved_core_values['Makabansa']['q4'] == 'AO') ? 'selected' : ''; ?>>AO</option>
+                                <option value="SO" <?php echo (isset($saved_core_values['Makabansa']) && $saved_core_values['Makabansa']['q4'] == 'SO') ? 'selected' : ''; ?>>SO</option>
+                                <option value="RO" <?php echo (isset($saved_core_values['Makabansa']) && $saved_core_values['Makabansa']['q4'] == 'RO') ? 'selected' : ''; ?>>RO</option>
+                                <option value="NO" <?php echo (isset($saved_core_values['Makabansa']) && $saved_core_values['Makabansa']['q4'] == 'NO') ? 'selected' : ''; ?>>NO</option>
                             </select>
                         </td>
                     </tr>

@@ -315,32 +315,9 @@ ob_start();
 
 <form id="sf10Form" method="POST">
 <div class="sf10-container">
-    <!-- Header -->
-    <div class="sf10-header">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="text-align: left;">
-                <strong>DepEd SF10</strong>
-            </div>
-            <div style="text-align: center; flex: 1;">
-                <div><strong>Republic of the Philippines</strong></div>
-                <div><strong>DEPARTMENT OF EDUCATION</strong></div>
-                <div><strong>IV-A CALABARZON</strong></div>
-                <div><strong>DIVISION OF BIÑAN CITY</strong></div>
-                <br>
-                <div class="sf10-title">BIÑAN INTEGRATED NATIONAL HIGH SCHOOL</div>
-                <div><strong>Senior High School</strong></div>
-                <div>Brgy. Sto. Domingo, City of Biñan, Laguna</div>
-                <div>Tel. No.: (049) 511-4425</div>
-                <br>
-                <div><strong>SENIOR HIGH SCHOOL STUDENT PERMANENT RECORD</strong></div>
-                <div><strong>(Learner's Record for Remedial Classes)</strong></div>
-            </div>
-            <div style="text-align: right;">
-                <div style="width: 80px; height: 80px; border: 1px solid #000; display: inline-block;">
-                    <!-- School Logo Space -->
-                </div>
-            </div>
-        </div>
+    <!-- Header Image -->
+    <div class="sf10-header" style="text-align: center; margin-bottom: 20px; border: none; padding: 0;">
+        <img src="img/sf10.png" alt="SF10 Header" style="width: 100%; max-width: 100%; height: auto; display: block;">
     </div>
 
     <!-- Student Information -->

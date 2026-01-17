@@ -493,6 +493,18 @@ ob_start();
         outline: 1px solid #0066cc;
     }
     
+    /* Hide number input spinner arrows */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    
+    input[type=number] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
+    
     .core-values-section {
         margin: 20px 0;
     }
